@@ -5,7 +5,8 @@ use ieee.numeric_std.all;
 
 entity fetch is
 	port (
-		clk_in: in std_logic
+		clk_in: in std_logic;
+		opcode_out: out std_logic_vector(31 downto 0)
 	);
 end fetch;
 
@@ -19,6 +20,8 @@ architecture rtl of fetch is
 
 	signal pc: unsigned(31 downto 0) := (others => '0');
 begin
+	opcode_out <= instructions(to_integer(pc(5 downto 2)));
+
 	process(clk_in)
 	begin
 		if rising_edge(clk_in) then
