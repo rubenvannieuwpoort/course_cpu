@@ -17,5 +17,13 @@ architecture rtl of fetch is
 		X"00000008", X"00000009", X"0000000a", X"0000000b", X"0000000c", X"0000000d", X"0000000e", X"0000000f"
 	);
 
+	signal pc: unsigned(31 downto 0) := (others => '0');
 begin
+	process(clk_in)
+	begin
+		if rising_edge(clk_in) then
+			pc <= pc + 4;
+		end if;
+	end process;
+
 end rtl;
