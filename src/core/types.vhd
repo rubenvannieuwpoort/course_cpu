@@ -4,6 +4,7 @@ use ieee.std_logic_1164.all;
 
 package core_types is
 	type decode_output_type is record
+		status: std_logic_vector(1 downto 0);
 		alu_function: std_logic_vector(4 downto 0);
 
 		writeback_register: std_logic_vector(4 downto 0);
