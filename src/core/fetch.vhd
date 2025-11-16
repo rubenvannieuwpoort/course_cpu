@@ -2,10 +2,13 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
+use work.core_types.all;
+
 
 entity fetch is
 	port (
-		clk: in std_logic
+		clk: in std_logic;
+		output: out fetch_output_t
 	);
 end fetch;
 
