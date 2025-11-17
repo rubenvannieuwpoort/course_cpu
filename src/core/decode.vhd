@@ -9,6 +9,7 @@ use work.core_constants.all;
 entity decode is
 	port (
 		clk: in std_logic;
+		input: in fetch_output_t;
 		output: out decode_output_t := DEFAULT_DECODE_OUTPUT
 	);
 end decode;
