@@ -8,4 +8,10 @@ package core_types is
 
 	type decode_output_t is record
 	end record decode_output_t;
+
+	type execute_output_t is record
+	end record execute_output_t;
+
+	type memory_output_t is record
+	end record memory_output_t;
 end package core_types;
