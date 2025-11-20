@@ -21,7 +21,11 @@ begin
 	process (clk)
 	begin
 		if rising_edge(clk) then
-			-- TODO: implement
+			if input.is_active = '1' then
+				-- TODO: decode instructions
+			else
+				output <= DEFAULT_DECODE_OUTPUT;
+			end if;
 		end if;
 	end process;
 
