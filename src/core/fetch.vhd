@@ -21,6 +21,8 @@ architecture rtl of fetch is
 		X"00000000", X"00000000", X"00000000", X"00000000", X"00000000", X"00000000", X"00000000", X"00000000"
 	);
 
+	signal pc: unsigned(31 downto 0) := (others => '0');
+
 begin
 
 	process (clk)
