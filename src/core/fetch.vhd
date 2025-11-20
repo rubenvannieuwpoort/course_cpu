@@ -28,7 +28,7 @@ begin
 	process (clk)
 	begin
 		if rising_edge(clk) then
-			-- TODO: implement
+			pc <= pc + 4;
 		end if;
 	end process;
 
