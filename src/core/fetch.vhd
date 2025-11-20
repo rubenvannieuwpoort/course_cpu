@@ -29,6 +29,7 @@ begin
 	begin
 		if rising_edge(clk) then
 			pc <= pc + 4;
+			output.instr <= imem(to_integer(pc(5 downto 2)));
 		end if;
 	end process;
 
