@@ -40,6 +40,8 @@ begin
 			i_imm_s := std_logic_vector(resize(signed(i_imm), 32));
 
 			if input.is_active = '1' then
+				output.is_active <= '1';
+
 				if opcode = "0010011" and funct3 = "000" then
 					-- ADDI rd, rs, imm (I-type): sets rd to the sum of rs1 and the sign-extended immediate
 					output.operation <= OP_ADD;

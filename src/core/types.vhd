@@ -11,6 +11,7 @@ package core_types is
 	end record fetch_output_t;
 
 	type decode_output_t is record
+		is_active: std_logic;
 		operation: operation_t;
 		operand1: std_logic_vector(31 downto 0);
 		operand2: std_logic_vector(31 downto 0);
