@@ -4,6 +4,7 @@ use ieee.std_logic_1164.all;
 
 package core_types is
 	type fetch_output_t is record
+		is_active: std_logic;
 		instr: std_logic_vector(31 downto 0);
 	end record fetch_output_t;
 
