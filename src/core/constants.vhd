@@ -12,6 +12,7 @@ package core_constants is
 
 	constant DEFAULT_DECODE_OUTPUT: decode_output_t := (
 		is_active => '0',
+		is_invalid => '0',
 		operation => OP_ADD,
 		operand1 => (others => '0'),
 		operand2 => (others => '0'),

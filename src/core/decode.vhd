@@ -28,6 +28,8 @@ begin
 
 		variable i_imm: std_logic_vector(11 downto 0);
 		variable i_imm_s: std_logic_vector(31 downto 0);
+
+		variable v_output: decode_output_t;
 	begin
 		if rising_edge(clk) then
 			opcode := input.instr(6 downto 0);
@@ -39,19 +41,26 @@ begin
 			i_imm := input.instr(31 downto 20);
 			i_imm_s := std_logic_vector(resize(signed(i_imm), 32));
 
+			v_output := DEFAULT_DECODE_OUTPUT;
+
 			if input.is_active = '1' then
-				output.is_active <= '1';
+				v_output.is_active := '1';
+				v_output.is_invalid := '0';
 
 				if opcode = "0010011" and funct3 = "000" then
 					-- ADDI rd, rs, imm (I-type): sets rd to the sum of rs1 and the sign-extended immediate
-					output.operation <= OP_ADD;
-					output.operand1 <= reg(to_integer(unsigned(rs1)));
-					output.operand2 <= i_imm_s;
-					output.destination_reg <= rd;
+					v_output.operation := OP_ADD;
+					v_output.operand1 := reg(to_integer(unsigned(rs1)));
+					v_output.operand2 := i_imm_s;
+					v_output.destination_reg := rd;
+				else
+					v_output.is_invalid := '1';
 				end if;
 			else
 				output <= DEFAULT_DECODE_OUTPUT;
 			end if;
+
+			output <= v_output;
 		end if;
 	end process;
 
