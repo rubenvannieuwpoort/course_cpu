@@ -43,7 +43,7 @@ begin
 				if opcode = "0010011" and funct3 = "000" then
 					-- ADDI rd, rs, imm (I-type): sets rd to the sum of rs1 and the sign-extended immediate
 					output.operation <= OP_ADD;
-					output.operand1 <= (others => '0');  -- TODO: load value from register
+					output.operand1 <= reg(to_integer(unsigned(rs1)));
 					output.operand2 <= i_imm_s;
 					output.destination_reg <= rd;
 				end if;
