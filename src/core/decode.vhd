@@ -16,6 +16,9 @@ end decode;
 
 
 architecture rtl of decode is
+	type registers is array(0 to 31) of std_logic_vector(31 downto 0);
+	signal reg: registers := (others => (others => '0'));
+
 begin
 
 	process (clk)
