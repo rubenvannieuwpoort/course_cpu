@@ -35,6 +35,11 @@ begin
 		variable v_decode_output: decode_output_t;
 	begin
 		if rising_edge(clk) then
+			-- write back result if the destination register is not x0 (which always stays 0)
+			if write_input.destination_reg /= "00000" then
+				reg(to_integer(unsigned(write_input.destination_reg))) <= write_input.result;
+			end if;
+
 			opcode := decode_input.instr(6 downto 0);
 			rs1    := decode_input.instr(19 downto 15);
 			rs2    := decode_input.instr(24 downto 20);
