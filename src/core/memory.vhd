@@ -21,7 +21,8 @@ begin
 	process (clk)
 	begin
 		if rising_edge(clk) then
-			-- TODO: implement
+			output.result <= input.result;
+			output.destination_reg <= input.destination_reg;
 		end if;
 	end process;
 

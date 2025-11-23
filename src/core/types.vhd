@@ -25,6 +25,7 @@ package core_types is
 	end record execute_output_t;
 
 	type memory_output_t is record
-		placeholder: std_logic;
+		result: std_logic_vector(31 downto 0);
+		destination_reg: std_logic_vector(4 downto 0);
 	end record memory_output_t;
 end package core_types;

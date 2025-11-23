@@ -25,6 +25,7 @@ package core_constants is
 	);
 
 	constant DEFAULT_MEMORY_OUTPUT: memory_output_t := (
-		placeholder => '0'
+		result => (others => '0'),
+		destination_reg => (others => '0')
 	);
 end package core_constants;
