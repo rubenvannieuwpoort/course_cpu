@@ -22,7 +22,12 @@ begin
 	begin
 		if rising_edge(clk) then
 			if input.is_active = '1' and input.is_invalid = '0' then
-				output.result <= (others => '0');  -- TODO: fill this with the result from the operation
+				if input.operation = OP_ADD then
+					output.result <= std_logic_vector(unsigned(input.operand1) + unsigned(input.operand2));
+				else
+					-- this should never happen
+				end if;
+
 				output.destination_reg <= input.destination_reg;
 			else
 				output <= DEFAULT_EXECUTE_OUTPUT;
