@@ -9,6 +9,7 @@ use work.core_constants.all;
 entity fetch is
 	port (
 		clk: in std_logic;
+		pipeline_ready: in std_logic;
 		output: out fetch_output_t := DEFAULT_FETCH_OUTPUT
 	);
 end fetch;
@@ -28,10 +29,14 @@ begin
 	process (clk)
 	begin
 		if rising_edge(clk) then
-			pc <= pc + 4;
+			if pipeline_ready = '1' then
+				pc <= pc + 4;
 
-			output.is_active <= '1';
-			output.instr <= imem(to_integer(pc(5 downto 2)));
+				output.is_active <= '1';
+				output.instr <= imem(to_integer(pc(5 downto 2)));
+			else
+				output <= DEFAULT_FETCH_OUTPUT;
+			end if;
 		end if;
 	end process;
 

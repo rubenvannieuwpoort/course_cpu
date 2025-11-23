@@ -13,7 +13,8 @@ entity decode_write is
 		decode_input: in fetch_output_t;
 		decode_output: out decode_output_t := DEFAULT_DECODE_OUTPUT;
 
-		write_input: in memory_output_t
+		write_input: in memory_output_t;
+		pipeline_ready: out std_logic := '1'
 	);
 end decode_write;
 
@@ -39,6 +40,8 @@ begin
 			if write_input.destination_reg /= "00000" then
 				reg(to_integer(unsigned(write_input.destination_reg))) <= write_input.result;
 			end if;
+
+			pipeline_ready <= write_input.is_active;
 
 			opcode := decode_input.instr(6 downto 0);
 			rs1    := decode_input.instr(19 downto 15);

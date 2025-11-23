@@ -18,10 +18,12 @@ architecture rtl of core is
 	signal decode_output: decode_output_t;
 	signal execute_output: execute_output_t;
 	signal memory_output: memory_output_t;
+	signal pipeline_ready: std_logic;
 
 	component fetch is
 		port (
 			clk: in std_logic;
+			pipeline_ready: in std_logic;
 			output: out fetch_output_t
 		);
 	end component;
@@ -31,7 +33,8 @@ architecture rtl of core is
 			clk: in std_logic;
 			decode_input: in fetch_output_t;
 			decode_output: out decode_output_t;
-			write_input: in memory_output_t
+			write_input: in memory_output_t;
+			pipeline_ready: out std_logic
 		);
 	end component;
 
@@ -52,9 +55,9 @@ architecture rtl of core is
 	end component;
 
 begin
-	fetch_inst: fetch port map(clk => clk, output => fetch_output);
+	fetch_inst: fetch port map(clk => clk, output => fetch_output, pipeline_ready => pipeline_ready);
 
-	decode_write_inst: decode_write port map(clk => clk, decode_input => fetch_output, decode_output => decode_output, write_input => memory_output);
+	decode_write_inst: decode_write port map(clk => clk, decode_input => fetch_output, decode_output => decode_output, write_input => memory_output, pipeline_ready => pipeline_ready);
 
 	execute_inst: execute port map(clk => clk, input => decode_output, output => execute_output);
 
