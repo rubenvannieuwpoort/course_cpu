@@ -21,7 +21,12 @@ begin
 	process (clk)
 	begin
 		if rising_edge(clk) then
-			-- TODO: implement
+			if input.is_active = '1' and input.is_invalid = '0' then
+				output.result <= (others => '0');  -- TODO: fill this with the result from the operation
+				output.destination_reg <= input.destination_reg;
+			else
+				output <= DEFAULT_EXECUTE_OUTPUT;
+			end if;
 		end if;
 	end process;
 
