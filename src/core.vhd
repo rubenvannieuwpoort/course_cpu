@@ -26,11 +26,12 @@ architecture rtl of core is
 		);
 	end component;
 
-	component decode is
+	component decode_write is
 		port (
 			clk: in std_logic;
-			input: in fetch_output_t;
-			output: out decode_output_t
+			decode_input: in fetch_output_t;
+			decode_output: out decode_output_t;
+			write_input: in memory_output_t
 		);
 	end component;
 
@@ -50,22 +51,13 @@ architecture rtl of core is
 		);
 	end component;
 
-	component write is
-		port (
-			clk: in std_logic;
-			input: in memory_output_t
-		);
-	end component;
-
 begin
 	fetch_inst: fetch port map(clk => clk, output => fetch_output);
 
-	decode_inst: decode port map(clk => clk, input => fetch_output, output => decode_output);
+	decode_write_inst: decode_write port map(clk => clk, decode_input => fetch_output, decode_output => decode_output, write_input => memory_output);
 
 	execute_inst: execute port map(clk => clk, input => decode_output, output => execute_output);
 
 	memory_inst: memory port map(clk => clk, input => execute_output, output => memory_output);
-
-	write_inst: write port map(clk => clk, input => memory_output);
 
 end rtl;

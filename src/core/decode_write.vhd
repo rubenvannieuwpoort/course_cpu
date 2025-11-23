@@ -6,16 +6,19 @@ use work.core_types.all;
 use work.core_constants.all;
 
 
-entity decode is
+entity decode_write is
 	port (
 		clk: in std_logic;
-		input: in fetch_output_t;
-		output: out decode_output_t := DEFAULT_DECODE_OUTPUT
+
+		decode_input: in fetch_output_t;
+		decode_output: out decode_output_t := DEFAULT_DECODE_OUTPUT;
+
+		write_input: in memory_output_t
 	);
-end decode;
+end decode_write;
 
 
-architecture rtl of decode is
+architecture rtl of decode_write is
 	type registers is array(0 to 31) of std_logic_vector(31 downto 0);
 	signal reg: registers := (others => (others => '0'));
 
@@ -29,38 +32,38 @@ begin
 		variable i_imm: std_logic_vector(11 downto 0);
 		variable i_imm_s: std_logic_vector(31 downto 0);
 
-		variable v_output: decode_output_t;
+		variable v_decode_output: decode_output_t;
 	begin
 		if rising_edge(clk) then
-			opcode := input.instr(6 downto 0);
-			rs1    := input.instr(19 downto 15);
-			rs2    := input.instr(24 downto 20);
-			funct3 := input.instr(14 downto 12);
-			rd     := input.instr(11 downto 7);
+			opcode := decode_input.instr(6 downto 0);
+			rs1    := decode_input.instr(19 downto 15);
+			rs2    := decode_input.instr(24 downto 20);
+			funct3 := decode_input.instr(14 downto 12);
+			rd     := decode_input.instr(11 downto 7);
 
-			i_imm := input.instr(31 downto 20);
+			i_imm := decode_input.instr(31 downto 20);
 			i_imm_s := std_logic_vector(resize(signed(i_imm), 32));
 
-			v_output := DEFAULT_DECODE_OUTPUT;
+			v_decode_output := DEFAULT_DECODE_OUTPUT;
 
-			if input.is_active = '1' then
-				v_output.is_active := '1';
-				v_output.is_invalid := '0';
+			if decode_input.is_active = '1' then
+				v_decode_output.is_active := '1';
+				v_decode_output.is_invalid := '0';
 
 				if opcode = "0010011" and funct3 = "000" then
 					-- ADDI rd, rs, imm (I-type): sets rd to the sum of rs1 and the sign-extended immediate
-					v_output.operation := OP_ADD;
-					v_output.operand1 := reg(to_integer(unsigned(rs1)));
-					v_output.operand2 := i_imm_s;
-					v_output.destination_reg := rd;
+					v_decode_output.operation := OP_ADD;
+					v_decode_output.operand1 := reg(to_integer(unsigned(rs1)));
+					v_decode_output.operand2 := i_imm_s;
+					v_decode_output.destination_reg := rd;
 				else
-					v_output.is_invalid := '1';
+					v_decode_output.is_invalid := '1';
 				end if;
 			else
-				output <= DEFAULT_DECODE_OUTPUT;
+				decode_output <= DEFAULT_DECODE_OUTPUT;
 			end if;
 
-			output <= v_output;
+			decode_output <= v_decode_output;
 		end if;
 	end process;
 
