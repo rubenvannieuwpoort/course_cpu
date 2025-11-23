@@ -25,7 +25,7 @@ begin
 				if input.operation = OP_ADD then
 					output.result <= std_logic_vector(unsigned(input.operand1) + unsigned(input.operand2));
 				else
-					-- this should never happen
+					assert false report "Unhandled operation value in execute stage" severity failure;
 				end if;
 
 				output.destination_reg <= input.destination_reg;
