@@ -19,19 +19,23 @@ architecture rtl of execute is
 begin
 
 	process (clk)
+		variable v_output: execute_output_t;
 	begin
 		if rising_edge(clk) then
+			v_output := DEFAULT_EXECUTE_OUTPUT;
+			v_output.is_active := input.is_active;
+
 			if input.is_active = '1' and input.is_invalid = '0' then
 				if input.operation = OP_ADD then
-					output.result <= std_logic_vector(unsigned(input.operand1) + unsigned(input.operand2));
+					v_output.result := std_logic_vector(unsigned(input.operand1) + unsigned(input.operand2));
 				else
 					assert false report "Unhandled operation value in execute stage" severity failure;
 				end if;
 
-				output.destination_reg <= input.destination_reg;
-			else
-				output <= DEFAULT_EXECUTE_OUTPUT;
+				v_output.destination_reg := input.destination_reg;
 			end if;
+
+			output <= v_output;
 		end if;
 	end process;
 
