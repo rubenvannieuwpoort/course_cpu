@@ -72,6 +72,12 @@ begin
 					v_decode_output.operand1 := reg(to_integer(unsigned(rs1)));
 					v_decode_output.operand2 := reg(to_integer(unsigned(rs2)));
 					v_decode_output.destination_reg := rd;
+				elsif opcode = "1111111" and funct3 = "000" then
+					-- LED rs1: set the LEDs to the 8 least significant bits of rs1
+					v_decode_output.operation := OP_LED;
+					v_decode_output.operand1 := reg(to_integer(unsigned(rs1)));
+					v_decode_output.operand2 := (others => '0');
+					v_decode_output.destination_reg := (others => '0');
 				else
 					v_decode_output.is_invalid := '1';
 				end if;
