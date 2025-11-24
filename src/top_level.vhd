@@ -16,12 +16,13 @@ architecture rtl of top_level is
 
 	component core is
 		port (
-			clk: in std_logic
+			clk: in std_logic;
+			led: out std_logic_vector(7 downto 0)
 		);
 	end component;
 
 begin
 
-	core_inst: core port map(clk => clk);
+	core_inst: core port map(clk => clk, led => led);
 
 end rtl;

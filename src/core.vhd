@@ -8,7 +8,8 @@ use work.core_constants.all;
 
 entity core is
 	port (
-		clk: in std_logic
+		clk: in std_logic;
+		led: out std_logic_vector(7 downto 0)
 	);
 end core;
 
