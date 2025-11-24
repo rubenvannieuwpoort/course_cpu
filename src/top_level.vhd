@@ -14,14 +14,14 @@ end top_level;
 architecture rtl of top_level is
 	signal count: unsigned(31 downto 0) := (others => '0');
 
-begin
-	led(7 downto 0) <= std_logic_vector(count(30 downto 23));
+	component core is
+		port (
+			clk: in std_logic
+		);
+	end component;
 
-	process (clk)
-	begin
-		if rising_edge(clk) then
-			count <= count + 1;
-		end if;
-	end process;
+begin
+
+	core_inst: core port map(clk => clk);
 
 end rtl;
