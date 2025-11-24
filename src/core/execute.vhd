@@ -10,7 +10,8 @@ entity execute is
 	port (
 		clk: in std_logic;
 		input: in decode_output_t;
-		output: out execute_output_t := DEFAULT_EXECUTE_OUTPUT
+		output: out execute_output_t := DEFAULT_EXECUTE_OUTPUT;
+		led: out std_logic_vector(7 downto 0) := (others => '0')
 	);
 end execute;
 
