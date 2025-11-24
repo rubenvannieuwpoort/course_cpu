@@ -3,7 +3,7 @@ use ieee.std_logic_1164.all;
 
 
 package core_types is
-	type operation_t is (OP_ADD);
+	type operation_t is (OP_ADD, OP_LED);
 
 	type fetch_output_t is record
 		is_active: std_logic;
