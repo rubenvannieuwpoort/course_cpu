@@ -28,6 +28,7 @@ begin
 	process (clk)
 		variable opcode: std_logic_vector(6 downto 0);
 		variable funct3: std_logic_vector(2 downto 0);
+		variable funct7: std_logic_vector(6 downto 0);
 		variable rs1, rs2, rd : std_logic_vector(4 downto 0);
 
 		variable i_imm: std_logic_vector(11 downto 0);
@@ -47,6 +48,7 @@ begin
 			rs1    := decode_input.instr(19 downto 15);
 			rs2    := decode_input.instr(24 downto 20);
 			funct3 := decode_input.instr(14 downto 12);
+			funct7 := decode_input.instr(31 downto 25);
 			rd     := decode_input.instr(11 downto 7);
 
 			i_imm := decode_input.instr(31 downto 20);
@@ -63,6 +65,12 @@ begin
 					v_decode_output.operation := OP_ADD;
 					v_decode_output.operand1 := reg(to_integer(unsigned(rs1)));
 					v_decode_output.operand2 := i_imm_s;
+					v_decode_output.destination_reg := rd;
+				elsif opcode = "0110011" and funct3 = "000" and funct7 = "0000000" then
+					-- ADD rd, rs1, rs2 (R-type): sets rd to the sum of rs1 and rs2
+					v_decode_output.operation := OP_ADD;
+					v_decode_output.operand1 := reg(to_integer(unsigned(rs1)));
+					v_decode_output.operand2 := reg(to_integer(unsigned(rs2)));
 					v_decode_output.destination_reg := rd;
 				else
 					v_decode_output.is_invalid := '1';
