@@ -31,8 +31,14 @@ begin
 		variable funct7: std_logic_vector(6 downto 0);
 		variable rs1, rs2, rd : std_logic_vector(4 downto 0);
 
+		variable b_imm: std_logic_vector(12 downto 0);
+		variable b_imm_s: std_logic_vector(31 downto 0);
 		variable i_imm: std_logic_vector(11 downto 0);
 		variable i_imm_s: std_logic_vector(31 downto 0);
+		variable j_imm: std_logic_vector(20 downto 0);
+		variable j_imm_s: std_logic_vector(31 downto 0);
+		variable s_imm: std_logic_vector(11 downto 0);
+		variable u_imm: std_logic_vector(31 downto 0);
 
 		variable v_decode_output: decode_output_t;
 	begin
@@ -51,7 +57,14 @@ begin
 			funct7 := decode_input.instr(31 downto 25);
 			rd     := decode_input.instr(11 downto 7);
 
+			b_imm := decode_input.instr(31) & decode_input.instr(7) & decode_input.instr(30 downto 25) & decode_input.instr(11 downto 8) & "0";
 			i_imm := decode_input.instr(31 downto 20);
+			j_imm := decode_input.instr(31) & decode_input.instr(19 downto 12) & decode_input.instr(20) & decode_input.instr(30 downto 21) & "0";
+			s_imm := decode_input.instr(31 downto 25) & decode_input.instr(11 downto 7);
+			u_imm := decode_input.instr(31 downto 12) & "000000000000";
+
+			-- sign extension
+			b_imm_s := std_logic_vector(resize(signed(b_imm), 32));
 			i_imm_s := std_logic_vector(resize(signed(i_imm), 32));
 
 			v_decode_output := DEFAULT_DECODE_OUTPUT;
