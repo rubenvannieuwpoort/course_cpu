@@ -73,30 +73,7 @@ begin
 				v_decode_output.is_active := '1';
 				v_decode_output.is_invalid := '0';
 
-				if opcode = "0010011" and funct3 = "000" then
-					-- ADDI rd, rs, imm (I-type): sets rd to the sum of rs1 and the sign-extended immediate
-					v_decode_output.operation := OP_ADD;
-					v_decode_output.operand1 := reg(to_integer(unsigned(rs1)));
-					v_decode_output.operand2 := i_imm_s;
-					v_decode_output.destination_reg := rd;
-				elsif opcode = "0110011" and funct3 = "000" and funct7 = "0000000" then
-					-- ADD rd, rs1, rs2 (R-type): sets rd to the sum of rs1 and rs2
-					v_decode_output.operation := OP_ADD;
-					v_decode_output.operand1 := reg(to_integer(unsigned(rs1)));
-					v_decode_output.operand2 := reg(to_integer(unsigned(rs2)));
-					v_decode_output.destination_reg := rd;
-				elsif opcode = "1111111" and funct3 = "000" then
-					-- LED rs1: set the LEDs to the 8 least significant bits of rs1
-					v_decode_output.operation := OP_LED;
-					v_decode_output.operand1 := reg(to_integer(unsigned(rs1)));
-					v_decode_output.operand2 := (others => '0');
-					v_decode_output.destination_reg := (others => '0');
-				elsif opcode = "1111111" and funct3 = "001" then
-					-- HANG
-					v_decode_output := DEFAULT_DECODE_OUTPUT;
-				else
-					v_decode_output.is_invalid := '1';
-				end if;
+				-- TODO: implement instruction decoding
 			else
 				decode_output <= DEFAULT_DECODE_OUTPUT;
 			end if;
