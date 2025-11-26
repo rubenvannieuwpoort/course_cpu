@@ -131,7 +131,11 @@ begin
 					end if;
 				elsif opcode = "0010011" then
 					if funct3 = "000" then
-						-- TODO: ADDI
+						-- ADDI
+						v_decode_output.operation := OP_ADD;
+						v_decode_output.operand1 := reg(to_integer(unsigned(rs1)));
+						v_decode_output.operand2 := i_imm_s;
+						v_decode_output.destination_reg := rd;
 					elsif funct3 = "010" then
 						-- TODO: SLTI
 					elsif funct3 = "" then
