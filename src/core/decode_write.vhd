@@ -74,7 +74,11 @@ begin
 				v_decode_output.is_invalid := '0';
 
 				if opcode = "0110111" then
-					-- TODO: LUI
+					-- LUI
+					v_decode_output.operation := OP_ADD;
+					v_decode_output.operand1 := (others => '0');
+					v_decode_output.operand2 := u_imm;
+					v_decode_output.destination_reg := rd;
 				elsif opcode = "0010111" then
 					-- TODO: AUIPC
 				else
