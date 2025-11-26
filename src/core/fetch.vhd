@@ -34,6 +34,7 @@ begin
 
 				output.is_active <= '1';
 				output.instr <= imem(to_integer(pc(5 downto 2)));
+				output.pc <= std_logic_vector(pc);
 			else
 				output <= DEFAULT_FETCH_OUTPUT;
 			end if;
