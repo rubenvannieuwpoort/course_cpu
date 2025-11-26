@@ -129,6 +129,16 @@ begin
 					else
 						v_decode_output.is_invalid := '1';
 					end if;
+				elsif opcode = "0010011" and funct3 = "001" and funct7 = "0000000" then
+					-- TODO: SLLI
+				elsif opcode = "0010011" and funct3 = "101" then
+					if funct7 = "0000000" then
+						-- TODO: SRLI
+					elsif funct7 = "0000001" then
+						-- TODO: SRAI
+					else
+						v_decode_output.is_invalid := '1';
+					end if;
 				elsif opcode = "0010011" then
 					v_decode_output.operand1 := reg(to_integer(unsigned(rs1)));
 					v_decode_output.operand2 := i_imm_s;
