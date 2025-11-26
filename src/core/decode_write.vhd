@@ -80,7 +80,11 @@ begin
 					v_decode_output.operand2 := u_imm;
 					v_decode_output.destination_reg := rd;
 				elsif opcode = "0010111" then
-					-- TODO: AUIPC
+					-- AUIPC
+					v_decode_output.operation := OP_ADD;
+					v_decode_output.operand1 := decode_input.pc;
+					v_decode_output.operand2 := u_imm;
+					v_decode_output.destination_reg := rd;
 				else
 					v_decode_output.is_invalid := '1';
 				end if;
