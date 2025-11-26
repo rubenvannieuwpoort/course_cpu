@@ -85,6 +85,10 @@ begin
 					v_decode_output.operand1 := decode_input.pc;
 					v_decode_output.operand2 := u_imm;
 					v_decode_output.destination_reg := rd;
+				elsif opcode = "1101111" then
+					-- TODO: JAL
+				elsif opcode = "1100111" and funct3 = "000" then
+					-- TODO: JALR
 				else
 					v_decode_output.is_invalid := '1';
 				end if;
