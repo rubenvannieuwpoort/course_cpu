@@ -138,15 +138,20 @@ begin
 						-- ADDI
 						v_decode_output.operation := OP_ADD;
 					elsif funct3 = "010" then
-						-- TODO: SLTI
-					elsif funct3 = "" then
-						-- TODO: SLTIU
-					elsif funct3 = "" then
-						-- TODO: XORI
-					elsif funct3 = "" then
-						-- TODO: ORI
-					elsif funct3 = "" then
-						-- TODO: ANDI
+						-- SLTI
+						v_decode_output.operation := OP_SLT;
+					elsif funct3 = "011" then
+						-- SLTIU
+						v_decode_output.operation := OP_SLTU;
+					elsif funct3 = "100" then
+						-- XORI
+						v_decode_output.operation := OP_XOR;
+					elsif funct3 = "110" then
+						-- ORI
+						v_decode_output.operation := OP_OR;
+					elsif funct3 = "111" then
+						-- ANDI
+						v_decode_output.operation := OP_AND;
 					else
 						v_decode_output.is_invalid := '1';
 					end if;
