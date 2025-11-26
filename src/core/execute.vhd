@@ -41,6 +41,12 @@ begin
 					else
 						v_output.result := (others => '0');
 					end if;
+				elsif input.operation = OP_XOR then
+					v_output.result := input.operand1 xor input.operand2;
+				elsif input.operation = OP_OR then
+					v_output.result := input.operand1 or input.operand2;
+				elsif input.operation = OP_AND then
+					v_output.result := input.operand1 and input.operand2;
 				elsif input.operation = OP_LED then
 					led <= input.operand1(7 downto 0);
 				else
