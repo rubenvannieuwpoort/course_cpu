@@ -89,6 +89,22 @@ begin
 					-- TODO: JAL
 				elsif opcode = "1100111" and funct3 = "000" then
 					-- TODO: JALR
+				elsif opcode = "1100011" then
+					if funct3 = "000" then
+						-- TODO: BEQ
+					elsif funct3 = "001" then
+						-- TODO: BNE
+					elsif funct3 = "100" then
+						-- TODO: BLT
+					elsif funct3 = "101" then
+						-- TODO: BGE
+					elsif funct3 = "110" then
+						-- TODO: BLTU
+					elsif funct3 = "111" then
+						-- TODO: BGEU
+					else
+						v_decode_output.is_invalid := '1';
+					end if;
 				else
 					v_decode_output.is_invalid := '1';
 				end if;
