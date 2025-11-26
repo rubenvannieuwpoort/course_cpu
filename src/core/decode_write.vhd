@@ -130,12 +130,22 @@ begin
 						v_decode_output.is_invalid := '1';
 					end if;
 				elsif opcode = "0010011" and funct3 = "001" and funct7 = "0000000" then
-					-- TODO: SLLI
+					-- SLLI
+					v_decode_output.operand1 := reg(to_integer(unsigned(rs1)));
+					v_decode_output.operand2 := "000000000000000000000000000" & rs2;
+					v_decode_output.destination_reg := rd;
+					v_decode_output.operation := OP_SLL;
 				elsif opcode = "0010011" and funct3 = "101" then
+					v_decode_output.operand1 := reg(to_integer(unsigned(rs1)));
+					v_decode_output.operand2 := "000000000000000000000000000" & rs2;
+					v_decode_output.destination_reg := rd;
+
 					if funct7 = "0000000" then
-						-- TODO: SRLI
+						-- SRLI
+						v_decode_output.operation := OP_SRL;
 					elsif funct7 = "0000001" then
-						-- TODO: SRAI
+						-- SRAI
+						v_decode_output.operation := OP_SRA;
 					else
 						v_decode_output.is_invalid := '1';
 					end if;
