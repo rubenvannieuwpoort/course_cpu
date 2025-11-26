@@ -105,6 +105,30 @@ begin
 					else
 						v_decode_output.is_invalid := '1';
 					end if;
+				elsif opcode = "0000011" then
+					if funct3 = "000" then
+						-- TODO: LB
+					elsif funct3 = "001" then
+						-- TODO: LH
+					elsif funct3 = "010" then
+						-- TODO: LW
+					elsif funct3 = "100" then
+						-- TODO: LBU
+					elsif funct3 = "101" then
+						-- TODO: LHU
+					else
+						v_decode_output.is_invalid := '1';
+					end if;
+				elsif opcode = "0100011" then
+					if funct3 = "000" then
+						-- TODO: SB
+					elsif funct3 = "001" then
+						-- TODO: SH
+					elsif funct3 = "010" then
+						-- TODO: SW
+					else
+						v_decode_output.is_invalid := '1';
+					end if;
 				else
 					v_decode_output.is_invalid := '1';
 				end if;
