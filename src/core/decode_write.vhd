@@ -129,6 +129,22 @@ begin
 					else
 						v_decode_output.is_invalid := '1';
 					end if;
+				elsif opcode = "0010011" then
+					if funct3 = "000" then
+						-- TODO: ADDI
+					elsif funct3 = "010" then
+						-- TODO: SLTI
+					elsif funct3 = "" then
+						-- TODO: SLTIU
+					elsif funct3 = "" then
+						-- TODO: XORI
+					elsif funct3 = "" then
+						-- TODO: ORI
+					elsif funct3 = "" then
+						-- TODO: ANDI
+					else
+						v_decode_output.is_invalid := '1';
+					end if;
 				else
 					v_decode_output.is_invalid := '1';
 				end if;
