@@ -29,6 +29,12 @@ begin
 			if input.is_active = '1' and input.is_invalid = '0' then
 				if input.operation = OP_ADD then
 					v_output.result := std_logic_vector(unsigned(input.operand1) + unsigned(input.operand2));
+				elsif input.operation = OP_SLT then
+					if signed(input.operand1) < signed(input.operand2) then
+						v_output.result := std_logic_vector(to_unsigned(1, 32));
+					else
+						v_output.result := (others => '0');
+					end if;
 				elsif input.operation = OP_LED then
 					led <= input.operand1(7 downto 0);
 				else
