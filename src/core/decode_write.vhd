@@ -73,7 +73,13 @@ begin
 				v_decode_output.is_active := '1';
 				v_decode_output.is_invalid := '0';
 
-				-- TODO: implement instruction decoding
+				if opcode = "0110111" then
+					-- TODO: LUI
+				elsif opcode = "0010111" then
+					-- TODO: AUIPC
+				else
+					v_decode_output.is_invalid := '1';
+				end if;
 			else
 				decode_output <= DEFAULT_DECODE_OUTPUT;
 			end if;
