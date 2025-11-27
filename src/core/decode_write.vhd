@@ -213,6 +213,10 @@ begin
 					else
 						v_decode_output.is_invalid := '1';
 					end if;
+				elsif funct3 = "000" and opcode = "0001111" then
+					-- FENCE
+					v_decode_output := DEFAULT_DECODE_OUTPUT;
+					v_decode_output.is_active := '1';
 				else
 					v_decode_output.is_invalid := '1';
 				end if;
