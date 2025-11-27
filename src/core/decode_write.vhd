@@ -175,6 +175,30 @@ begin
 					else
 						v_decode_output.is_invalid := '1';
 					end if;
+				elsif opcode = "0110011" then
+					if funct7 = "0000000" and funct3 = "000" then
+						-- TODO: ADD
+					elsif funct7 = "0100000" and funct3 = "000" then
+						-- TODO: SUB
+					elsif funct7 = "0000000" and funct3 = "001" then
+						-- TODO: SLL
+					elsif funct7 = "0000000" and funct3 = "010" then
+						-- TODO: SLT
+					elsif funct7 = "0000000" and funct3 = "011" then
+						-- TODO: SLTU
+					elsif funct7 = "0000000" and funct3 = "100" then
+						-- TODO: XOR
+					elsif funct7 = "0000000" and funct3 = "101" then
+						-- TODO: SRL
+					elsif funct7 = "0100000" and funct3 = "101" then
+						-- TODO: SRA
+					elsif funct7 = "0000000" and funct3 = "110" then
+						-- TODO: OR
+					elsif funct7 = "0000000" and funct3 = "111" then
+						-- TODO: AND
+					else
+						v_decode_output.is_invalid := '1';
+					end if;
 				else
 					v_decode_output.is_invalid := '1';
 				end if;
