@@ -217,6 +217,10 @@ begin
 					-- FENCE
 					v_decode_output := DEFAULT_DECODE_OUTPUT;
 					v_decode_output.is_active := '1';
+				elsif i_imm = "000000000000" and rs1 = "00000" and funct3 = "000" and rd = "00000" and opcode = "1110011" then
+					-- ECALL
+				elsif i_imm = "000000000001" and rs1 = "00000" and funct3 = "000" and rd = "00000" and opcode = "1110011" then
+					-- EBREAK
 				else
 					v_decode_output.is_invalid := '1';
 				end if;
