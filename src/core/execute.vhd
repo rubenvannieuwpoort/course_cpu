@@ -67,27 +67,14 @@ begin
 					if input.operand2(0) = '1' then
 						v_output.result := v_output.result(30 downto 0) & "0";
 					end if;
-				elsif input.operation = OP_SRL then
+				elsif input.operation = OP_SRL or input.operation = OP_SRA then
 					v_output.result := input.operand1;
 
-					if input.operand2(4) = '1' then
-						v_output.result := "0000000000000000" & v_output.result(31 downto 16);
+					if input.operation = OP_SRL then
+						v_sign := (others => '0');
+					else
+						v_sign := (others => input.operand1(31));
 					end if;
-					if input.operand2(3) = '1' then
-						v_output.result := "00000000" & v_output.result(31 downto 8);
-					end if;
-					if input.operand2(2) = '1' then
-						v_output.result := "0000" & v_output.result(31 downto 4);
-					end if;
-					if input.operand2(1) = '1' then
-						v_output.result := "00" & v_output.result(31 downto 2);
-					end if;
-					if input.operand2(0) = '1' then
-						v_output.result := "0" & v_output.result(31 downto 1);
-					end if;
-				elsif input.operation = OP_SRA then
-					v_output.result := input.operand1;
-					v_sign := (others => input.operand1(31));
 
 					if input.operand2(4) = '1' then
 						v_output.result := v_sign(15 downto 0) & v_output.result(31 downto 16);
