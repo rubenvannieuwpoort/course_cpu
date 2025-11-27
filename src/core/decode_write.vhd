@@ -176,26 +176,40 @@ begin
 						v_decode_output.is_invalid := '1';
 					end if;
 				elsif opcode = "0110011" then
+					v_decode_output.operand1 := reg(to_integer(unsigned(rs1)));
+					v_decode_output.operand2 := reg(to_integer(unsigned(rs2)));
+					v_decode_output.destination_reg := rd;
+
 					if funct7 = "0000000" and funct3 = "000" then
-						-- TODO: ADD
+						-- ADD
+						v_decode_output.operation := OP_ADD;
 					elsif funct7 = "0100000" and funct3 = "000" then
-						-- TODO: SUB
+						-- SUB
+						v_decode_output.operation := OP_SUB;
 					elsif funct7 = "0000000" and funct3 = "001" then
-						-- TODO: SLL
+						-- SLL
+						v_decode_output.operation := OP_SLL;
 					elsif funct7 = "0000000" and funct3 = "010" then
-						-- TODO: SLT
+						-- SLT
+						v_decode_output.operation := OP_SLT;
 					elsif funct7 = "0000000" and funct3 = "011" then
-						-- TODO: SLTU
+						-- SLTU
+						v_decode_output.operation := OP_SLTU;
 					elsif funct7 = "0000000" and funct3 = "100" then
-						-- TODO: XOR
+						-- XOR
+						v_decode_output.operation := OP_XOR;
 					elsif funct7 = "0000000" and funct3 = "101" then
-						-- TODO: SRL
+						-- SRL
+						v_decode_output.operation := OP_SRL;
 					elsif funct7 = "0100000" and funct3 = "101" then
-						-- TODO: SRA
+						-- SRA
+						v_decode_output.operation := OP_SRA;
 					elsif funct7 = "0000000" and funct3 = "110" then
-						-- TODO: OR
+						-- OR
+						v_decode_output.operation := OP_OR;
 					elsif funct7 = "0000000" and funct3 = "111" then
-						-- TODO: AND
+						-- AND
+						v_decode_output.operation := OP_AND;
 					else
 						v_decode_output.is_invalid := '1';
 					end if;
