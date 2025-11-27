@@ -219,6 +219,15 @@ begin
 					-- ECALL
 				elsif i_imm = "000000000001" and rs1 = "00000" and funct3 = "000" and rd = "00000" and opcode = "1110011" then
 					-- EBREAK
+				elsif opcode = "1111111" and funct3 = "000" then
+					-- LED (custom instruction): set the LEDs to the 8 least significant bits of rs1
+					v_decode_output.operation := OP_LED;
+					v_decode_output.operand1 := reg(to_integer(unsigned(rs1)));
+					v_decode_output.operand2 := (others => '0');
+					v_decode_output.destination_reg := (others => '0');
+				elsif opcode = "1111111" and funct3 = "001" then
+					-- HANG (custom instruction): stops execution of the CPU
+					v_decode_output := DEFAULT_DECODE_OUTPUT;
 				else
 					v_decode_output.is_invalid := '1';
 				end if;
