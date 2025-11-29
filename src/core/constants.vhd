@@ -17,6 +17,7 @@ package core_constants is
 		operation => OP_ADD,
 		operand1 => (others => '0'),
 		operand2 => (others => '0'),
+		operand3 => (others => '0'),
 		destination_reg => (others => '0')
 	);
 
