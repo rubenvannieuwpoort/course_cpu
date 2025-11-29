@@ -66,6 +66,7 @@ begin
 			-- sign extension
 			b_imm_s := std_logic_vector(resize(signed(b_imm), 32));
 			i_imm_s := std_logic_vector(resize(signed(i_imm), 32));
+			j_imm_s := std_logic_vector(resize(signed(j_imm), 32));
 
 			v_decode_output := DEFAULT_DECODE_OUTPUT;
 
@@ -86,9 +87,19 @@ begin
 					v_decode_output.operand2 := u_imm;
 					v_decode_output.destination_reg := rd;
 				elsif opcode = "1101111" then
-					-- TODO: JAL
+					-- JAL
+					v_decode_output.operation := OP_JAL;
+					v_decode_output.operand1 := decode_input.pc;
+					v_decode_output.operand2 := j_imm_s;
+					v_decode_output.operand3 := std_logic_vector(unsigned(decode_input.pc) + 4);
+					v_decode_output.destination_reg := rd;
 				elsif opcode = "1100111" and funct3 = "000" then
-					-- TODO: JALR
+					-- JALR
+					v_decode_output.operation := OP_JAL;
+					v_decode_output.operand1 := reg(to_integer(unsigned(rs1)));
+					v_decode_output.operand2 := i_imm_s;
+					v_decode_output.operand3 := std_logic_vector(unsigned(decode_input.pc) + 4);
+					v_decode_output.destination_reg := rd;
 				elsif opcode = "1100011" then
 					if funct3 = "000" then
 						-- TODO: BEQ
