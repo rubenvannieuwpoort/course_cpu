@@ -17,6 +17,7 @@ package core_types is
 		operation: operation_t;
 		operand1: std_logic_vector(31 downto 0);
 		operand2: std_logic_vector(31 downto 0);
+		operand3: std_logic_vector(31 downto 0);
 		destination_reg: std_logic_vector(4 downto 0);
 	end record decode_output_t;
 
