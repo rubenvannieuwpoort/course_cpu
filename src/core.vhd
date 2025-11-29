@@ -20,11 +20,15 @@ architecture rtl of core is
 	signal execute_output: execute_output_t;
 	signal memory_output: memory_output_t;
 	signal pipeline_ready: std_logic;
+	signal jump: std_logic;
+	signal jump_address: std_logic_vector(31 downto 0);
 
 	component fetch is
 		port (
 			clk: in std_logic;
 			pipeline_ready: in std_logic;
+			jump: in std_logic;
+			jump_address: in std_logic_vector(31 downto 0);
 			output: out fetch_output_t
 		);
 	end component;
@@ -44,6 +48,8 @@ architecture rtl of core is
 			clk: in std_logic;
 			input: in decode_output_t;
 			output: out execute_output_t;
+			jump: out std_logic := '0';
+			jump_address: out std_logic_vector(31 downto 0);
 			led: out std_logic_vector(7 downto 0)
 		);
 	end component;
@@ -57,11 +63,11 @@ architecture rtl of core is
 	end component;
 
 begin
-	fetch_inst: fetch port map(clk => clk, output => fetch_output, pipeline_ready => pipeline_ready);
+	fetch_inst: fetch port map(clk => clk, pipeline_ready => pipeline_ready, jump => jump, jump_address => jump_address, output => fetch_output);
 
 	decode_write_inst: decode_write port map(clk => clk, decode_input => fetch_output, decode_output => decode_output, write_input => memory_output, pipeline_ready => pipeline_ready);
 
-	execute_inst: execute port map(clk => clk, input => decode_output, output => execute_output, led => led);
+	execute_inst: execute port map(clk => clk, input => decode_output, output => execute_output, jump => jump, jump_address => jump_address, led => led);
 
 	memory_inst: memory port map(clk => clk, input => execute_output, output => memory_output);
 
