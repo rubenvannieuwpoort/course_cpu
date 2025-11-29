@@ -24,11 +24,15 @@ begin
 	process (clk)
 		variable v_output: execute_output_t;
 		variable v_sign: std_logic_vector(31 downto 0);
+		variable v_jump: std_logic;
+		variable v_jump_address: std_logic_vector(31 downto 0);
 		
 	begin
 		if rising_edge(clk) then
 			v_output := DEFAULT_EXECUTE_OUTPUT;
 			v_output.is_active := input.is_active;
+			v_jump := '0';
+			v_jump_address := (others => '0');
 
 			if input.is_active = '1' and input.is_invalid = '0' then
 				if input.operation = OP_ADD then
@@ -95,6 +99,10 @@ begin
 					if input.operand2(0) = '1' then
 						v_output.result := v_sign(1 downto 0) & v_output.result(31 downto 2);
 					end if;
+				elsif input.operation = OP_JAL then
+					v_jump := '1';
+					v_jump_address := std_logic_vector(unsigned(input.operand1) + unsigned(input.operand2));
+					v_output.result := input.operand3;
 				elsif input.operation = OP_LED then
 					led <= input.operand1(7 downto 0);
 				else
@@ -103,6 +111,9 @@ begin
 
 				v_output.destination_reg := input.destination_reg;
 			end if;
+
+			jump <= v_jump;
+			jump_address <= v_jump_address(31 downto 1) & "0";
 
 			output <= v_output;
 		end if;
