@@ -37,6 +37,8 @@ begin
 				output.is_active <= '1';
 				output.instr <= imem(to_integer(pc(5 downto 2)));
 				output.pc <= std_logic_vector(pc);
+			elsif jump = '1' then
+				pc <= unsigned(jump_address);
 			else
 				output <= DEFAULT_FETCH_OUTPUT;
 			end if;
