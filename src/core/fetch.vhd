@@ -10,6 +10,8 @@ entity fetch is
 	port (
 		clk: in std_logic;
 		pipeline_ready: in std_logic;
+		jump: in std_logic;
+		jump_address: in std_logic_vector(31 downto 0);
 		output: out fetch_output_t := DEFAULT_FETCH_OUTPUT
 	);
 end fetch;
