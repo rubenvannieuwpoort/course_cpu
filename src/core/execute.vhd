@@ -103,6 +103,36 @@ begin
 					v_jump := '1';
 					v_jump_address := std_logic_vector(unsigned(input.operand1) + unsigned(input.operand2));
 					v_output.result := input.operand3;
+				elsif input.operation = OP_BEQ then
+					if input.operand1 = input.operand2 then
+						v_jump := '1';
+						v_jump_address := input.operand3;
+					end if;
+				elsif input.operation = OP_BNE then
+					if input.operand1 /= input.operand2 then
+						v_jump := '1';
+						v_jump_address := input.operand3;
+					end if;
+				elsif input.operation = OP_BLT then
+					if signed(input.operand1) < signed(input.operand2) then
+						v_jump := '1';
+						v_jump_address := input.operand3;
+					end if;
+				elsif input.operation = OP_BGE then
+					if signed(input.operand1) >= signed(input.operand2) then
+						v_jump := '1';
+						v_jump_address := input.operand3;
+					end if;
+				elsif input.operation = OP_BLTU then
+					if unsigned(input.operand1) < unsigned(input.operand2) then
+						v_jump := '1';
+						v_jump_address := input.operand3;
+					end if;
+				elsif input.operation = OP_BGEU then
+					if unsigned(input.operand1) >= unsigned(input.operand2) then
+						v_jump := '1';
+						v_jump_address := input.operand3;
+					end if;
 				elsif input.operation = OP_LED then
 					led <= input.operand1(7 downto 0);
 				else
