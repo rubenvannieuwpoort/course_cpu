@@ -20,8 +20,8 @@ end fetch;
 architecture rtl of fetch is
 	type instruction_memory_t is array(0 to 15) of std_logic_vector(31 downto 0);
 	signal imem: instruction_memory_t := (
-		X"00110113", X"002080b3", X"00208133", X"002080b3", X"00208133", X"002080b3", X"00208133", X"002080b3",
-		X"00208133", X"002080b3", X"00208133", X"002080b3", X"00208133", X"0001007f", X"0000107f", X"00000000"
+		X"00a00193", X"00100113", X"00208133", X"002080b3", X"ffe18193", X"fe304ae3", X"00018463", X"00010093",
+		X"0000006f", X"00000000", X"00000000", X"00000000", X"00000000", X"00000000", X"00000000", X"00000000"
 	);
 
 	signal pc: unsigned(31 downto 0) := (others => '0');
