@@ -101,18 +101,28 @@ begin
 					v_decode_output.operand3 := std_logic_vector(unsigned(decode_input.pc) + 4);
 					v_decode_output.destination_reg := rd;
 				elsif opcode = "1100011" then
+					v_decode_output.operand1 := reg(to_integer(unsigned(rs1)));
+					v_decode_output.operand2 := reg(to_integer(unsigned(rs2)));
+					v_decode_output.operand3 := std_logic_vector(unsigned(decode_input.pc) + unsigned(b_imm_s));
+
 					if funct3 = "000" then
-						-- TODO: BEQ
+						-- BEQ
+						v_decode_output.operation := OP_BEQ;
 					elsif funct3 = "001" then
-						-- TODO: BNE
+						-- BNE
+						v_decode_output.operation := OP_BNE;
 					elsif funct3 = "100" then
-						-- TODO: BLT
+						-- BLT
+						v_decode_output.operation := OP_BLT;
 					elsif funct3 = "101" then
-						-- TODO: BGE
+						-- BGE
+						v_decode_output.operation := OP_BGE;
 					elsif funct3 = "110" then
-						-- TODO: BLTU
+						-- BLTU
+						v_decode_output.operation := OP_BLTU;
 					elsif funct3 = "111" then
-						-- TODO: BGEU
+						-- BGEU
+						v_decode_output.operation := OP_BGEU;
 					else
 						v_decode_output.is_invalid := '1';
 					end if;
