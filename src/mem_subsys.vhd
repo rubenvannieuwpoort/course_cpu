@@ -26,6 +26,6 @@ begin
 			if req.active = '1' then
 				ram(to_integer(unsigned(req.address(11 downto 2)))) <= req.value;
 			end if;
-	   end if;
+		end if;
 	end process;
 end rtl;
