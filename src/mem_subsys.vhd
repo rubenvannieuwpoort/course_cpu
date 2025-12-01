@@ -15,5 +15,17 @@ end mem_subsys;
 
 
 architecture rtl of mem_subsys is
+	type ram_t is array (0 to 1023) of std_logic_vector(31 downto 0);
+	signal ram: ram_t := (others => (others => '0'));
+
 begin
+
+	process (clk)
+	begin
+		if rising_edge(clk) then
+			if req.active = '1' then
+				ram(to_integer(unsigned(req.address(11 downto 2)))) <= req.value;
+			end if;
+	   end if;
+	end process;
 end rtl;
