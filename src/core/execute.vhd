@@ -30,11 +30,13 @@ begin
 		variable v_sign: std_logic_vector(31 downto 0);
 		variable v_jump: std_logic;
 		variable v_jump_address: std_logic_vector(31 downto 0);
+		variable v_mem_req: mem_req_t;
 		
 	begin
 		if rising_edge(clk) then
 			v_output := DEFAULT_EXECUTE_OUTPUT;
 			v_output.is_active := input.is_active;
+			v_mem_req := DEFAULT_MEM_REQ;
 			v_jump := '0';
 			v_jump_address := (others => '0');
 
@@ -138,7 +140,9 @@ begin
 						v_jump_address := input.operand3;
 					end if;
 				elsif input.operation = OP_SW then
-					-- TODO: implement
+					v_mem_req.active := '1';
+					v_mem_req.address := input.operand1;
+					v_mem_req.value := input.operand2;
 				elsif input.operation = OP_LED then
 					led <= input.operand1(7 downto 0);
 				else
@@ -148,10 +152,12 @@ begin
 				v_output.destination_reg := input.destination_reg;
 			end if;
 
+			output <= v_output;
+
+			mem_req <= v_mem_req;
+
 			jump <= v_jump;
 			jump_address <= v_jump_address(31 downto 1) & "0";
-
-			output <= v_output;
 		end if;
 	end process;
 
