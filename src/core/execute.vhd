@@ -2,6 +2,9 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
+use work.types.all;
+use work.constants.all;
+
 use work.core_types.all;
 use work.core_constants.all;
 
@@ -11,6 +14,7 @@ entity execute is
 		clk: in std_logic;
 		input: in decode_output_t;
 		output: out execute_output_t := DEFAULT_EXECUTE_OUTPUT;
+		mem_req: out mem_req_t := DEFAULT_MEM_REQ;
 		jump: out std_logic := '0';
 		jump_address: out std_logic_vector(31 downto 0) := (others => '0');
 		led: out std_logic_vector(7 downto 0) := (others => '0')
