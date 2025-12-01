@@ -1,0 +1,11 @@
+library ieee;
+use ieee.std_logic_1164.all;
+
+
+package types is
+	type mem_req_t is record
+		active: std_logic;
+		address: std_logic_vector(31 downto 0);
+		value: std_logic_vector(31 downto 0);
+	end record mem_req_t;
+end package types;
