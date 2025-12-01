@@ -2,6 +2,8 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
+use work.types.all;
+
 use work.core_types.all;
 use work.core_constants.all;
 
@@ -9,6 +11,7 @@ use work.core_constants.all;
 entity core is
 	port (
 		clk: in std_logic;
+		mem_req: out mem_req_t;
 		led: out std_logic_vector(7 downto 0)
 	);
 end core;
@@ -48,6 +51,7 @@ architecture rtl of core is
 			clk: in std_logic;
 			input: in decode_output_t;
 			output: out execute_output_t;
+			mem_req: out mem_req_t;
 			jump: out std_logic := '0';
 			jump_address: out std_logic_vector(31 downto 0);
 			led: out std_logic_vector(7 downto 0)
@@ -67,7 +71,7 @@ begin
 
 	decode_write_inst: decode_write port map(clk => clk, decode_input => fetch_output, decode_output => decode_output, write_input => memory_output, pipeline_ready => pipeline_ready);
 
-	execute_inst: execute port map(clk => clk, input => decode_output, output => execute_output, jump => jump, jump_address => jump_address, led => led);
+	execute_inst: execute port map(clk => clk, input => decode_output, output => execute_output, mem_req => mem_req, jump => jump, jump_address => jump_address, led => led);
 
 	memory_inst: memory port map(clk => clk, input => execute_output, output => memory_output);
 
