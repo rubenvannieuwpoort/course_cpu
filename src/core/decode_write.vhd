@@ -38,6 +38,7 @@ begin
 		variable j_imm: std_logic_vector(20 downto 0);
 		variable j_imm_s: std_logic_vector(31 downto 0);
 		variable s_imm: std_logic_vector(11 downto 0);
+		variable s_imm_s: std_logic_vector(31 downto 0);
 		variable u_imm: std_logic_vector(31 downto 0);
 
 		variable v_decode_output: decode_output_t;
@@ -67,6 +68,7 @@ begin
 			b_imm_s := std_logic_vector(resize(signed(b_imm), 32));
 			i_imm_s := std_logic_vector(resize(signed(i_imm), 32));
 			j_imm_s := std_logic_vector(resize(signed(j_imm), 32));
+			s_imm_s := std_logic_vector(resize(signed(s_imm), 32));
 
 			v_decode_output := DEFAULT_DECODE_OUTPUT;
 
@@ -141,12 +143,17 @@ begin
 						v_decode_output.is_invalid := '1';
 					end if;
 				elsif opcode = "0100011" then
+					-- store instructions
+					v_decode_output.operand1 := std_logic_vector(unsigned(reg(to_integer(unsigned(rs1)))) + unsigned(s_imm_s));
+					v_decode_output.operand2 := reg(to_integer(unsigned(rs2)));
+
 					if funct3 = "000" then
 						-- TODO: SB
 					elsif funct3 = "001" then
 						-- TODO: SH
 					elsif funct3 = "010" then
-						-- TODO: SW
+						-- SW
+						v_decode_output.operation := OP_SW;
 					else
 						v_decode_output.is_invalid := '1';
 					end if;
