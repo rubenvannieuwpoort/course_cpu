@@ -133,6 +133,8 @@ begin
 						v_jump := '1';
 						v_jump_address := input.operand3;
 					end if;
+				elsif input.operation = OP_SW then
+					-- TODO: implement
 				elsif input.operation = OP_LED then
 					led <= input.operand1(7 downto 0);
 				else
