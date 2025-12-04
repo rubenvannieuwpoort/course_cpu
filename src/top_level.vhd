@@ -15,6 +15,7 @@ end top_level;
 
 architecture rtl of top_level is
 	signal mem_req: mem_req_t;
+	signal mem_res: std_logic_vector(31 downto 0);
 
 	component core is
 		port (
@@ -28,6 +29,7 @@ architecture rtl of top_level is
 		port (
 			clk: in std_logic;
 			req: in mem_req_t;
+			res: out std_logic_vector(31 downto 0)
 		);
 	end component;
 
@@ -35,6 +37,6 @@ begin
 
 	core_inst: core port map(clk => clk, mem_req => mem_req, led => led);
 
-	mem_subsys_inst: mem_subsys port map(clk => clk, req => mem_req);
+	mem_subsys_inst: mem_subsys port map(clk => clk, req => mem_req, res => mem_res);
 
 end rtl;
