@@ -47,7 +47,11 @@ begin
 		if rising_edge(clk) then
 			-- write back result if the destination register is not x0 (which always stays 0)
 			if write_input.destination_reg /= "00000" then
-				reg(to_integer(unsigned(write_input.destination_reg))) <= write_input.result;
+				if write_input.use_mem = '1' then
+					reg(to_integer(unsigned(write_input.destination_reg))) <= mem_res;
+				else
+					reg(to_integer(unsigned(write_input.destination_reg))) <= write_input.result;
+				end if;
 			end if;
 
 			pipeline_ready <= write_input.is_active;
