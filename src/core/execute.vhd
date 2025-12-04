@@ -145,6 +145,7 @@ begin
 					v_mem_req.address := input.operand1;
 					v_mem_req.value := input.operand2;
 				elsif input.operation = OP_LW then
+					v_output.use_mem := '1';
 					v_mem_req.active := '1';
 					v_mem_req.cmd := MEM_CMD_READ;
 					v_mem_req.address := input.operand1;
