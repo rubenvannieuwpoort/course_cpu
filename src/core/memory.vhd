@@ -22,6 +22,7 @@ begin
 	begin
 		if rising_edge(clk) then
 			output.is_active <= input.is_active;
+			output.use_mem <= input.use_mem;
 			output.result <= input.result;
 			output.destination_reg <= input.destination_reg;
 		end if;
