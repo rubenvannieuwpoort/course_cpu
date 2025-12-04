@@ -23,12 +23,14 @@ package core_constants is
 
 	constant DEFAULT_EXECUTE_OUTPUT: execute_output_t := (
 		is_active => '0',
+		use_mem => '0',
 		result => (others => '0'),
 		destination_reg => (others => '0')
 	);
 
 	constant DEFAULT_MEMORY_OUTPUT: memory_output_t := (
 		is_active => '0',
+		use_mem => '0',
 		result => (others => '0'),
 		destination_reg => (others => '0')
 	);
