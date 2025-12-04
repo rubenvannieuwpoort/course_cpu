@@ -129,12 +129,17 @@ begin
 						v_decode_output.is_invalid := '1';
 					end if;
 				elsif opcode = "0000011" then
+					-- load instructions
+					v_decode_output.operand1 := std_logic_vector(unsigned(reg(to_integer(unsigned(rs1)))) + unsigned(i_imm_s));
+					v_decode_output.destination_reg := rd;
+
 					if funct3 = "000" then
 						-- TODO: LB
 					elsif funct3 = "001" then
 						-- TODO: LH
 					elsif funct3 = "010" then
-						-- TODO: LW
+						-- LW
+						v_decode_output.operation := OP_LW;
 					elsif funct3 = "100" then
 						-- TODO: LBU
 					elsif funct3 = "101" then
