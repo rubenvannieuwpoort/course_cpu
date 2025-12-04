@@ -14,6 +14,7 @@ entity decode_write is
 		decode_output: out decode_output_t := DEFAULT_DECODE_OUTPUT;
 
 		write_input: in memory_output_t;
+		mem_res: in std_logic_vector(31 downto 0);
 		pipeline_ready: out std_logic := '1'
 	);
 end decode_write;

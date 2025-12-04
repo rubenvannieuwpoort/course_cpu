@@ -12,6 +12,7 @@ entity core is
 	port (
 		clk: in std_logic;
 		mem_req: out mem_req_t;
+		mem_res: in std_logic_vector(31 downto 0);
 		led: out std_logic_vector(7 downto 0)
 	);
 end core;
@@ -42,6 +43,7 @@ architecture rtl of core is
 			decode_input: in fetch_output_t;
 			decode_output: out decode_output_t;
 			write_input: in memory_output_t;
+			mem_res: in std_logic_vector(31 downto 0);
 			pipeline_ready: out std_logic
 		);
 	end component;
@@ -69,7 +71,7 @@ architecture rtl of core is
 begin
 	fetch_inst: fetch port map(clk => clk, pipeline_ready => pipeline_ready, jump => jump, jump_address => jump_address, output => fetch_output);
 
-	decode_write_inst: decode_write port map(clk => clk, decode_input => fetch_output, decode_output => decode_output, write_input => memory_output, pipeline_ready => pipeline_ready);
+	decode_write_inst: decode_write port map(clk => clk, decode_input => fetch_output, decode_output => decode_output, write_input => memory_output, mem_res => mem_res, pipeline_ready => pipeline_ready);
 
 	execute_inst: execute port map(clk => clk, input => decode_output, output => execute_output, mem_req => mem_req, jump => jump, jump_address => jump_address, led => led);
 
