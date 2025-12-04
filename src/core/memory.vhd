@@ -10,7 +10,7 @@ entity memory is
 	port (
 		clk: in std_logic;
 		input: in execute_output_t;
-		output: out memory_output_t := DEFAULT_MEMORY_OUTPUT
+		output: out execute_output_t := DEFAULT_EXECUTE_OUTPUT
 	);
 end memory;
 

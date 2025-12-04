@@ -22,7 +22,7 @@ architecture rtl of core is
 	signal fetch_output: fetch_output_t;
 	signal decode_output: decode_output_t;
 	signal execute_output: execute_output_t;
-	signal memory_output: memory_output_t;
+	signal memory_output: execute_output_t;
 	signal pipeline_ready: std_logic;
 	signal jump: std_logic;
 	signal jump_address: std_logic_vector(31 downto 0);
@@ -42,7 +42,7 @@ architecture rtl of core is
 			clk: in std_logic;
 			decode_input: in fetch_output_t;
 			decode_output: out decode_output_t;
-			write_input: in memory_output_t;
+			write_input: in execute_output_t;
 			mem_res: in std_logic_vector(31 downto 0);
 			pipeline_ready: out std_logic
 		);
@@ -64,7 +64,7 @@ architecture rtl of core is
 		port (
 			clk: in std_logic;
 			input: in execute_output_t;
-			output: out memory_output_t
+			output: out execute_output_t
 		);
 	end component;
 
