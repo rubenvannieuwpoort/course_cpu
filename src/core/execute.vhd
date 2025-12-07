@@ -141,13 +141,13 @@ begin
 					end if;
 				elsif input.operation = OP_SW then
 					v_mem_req.active := '1';
-					v_mem_req.cmd := MEM_CMD_WRITE;
+					v_mem_req.write := '1';
 					v_mem_req.address := input.operand1;
 					v_mem_req.value := input.operand2;
 				elsif input.operation = OP_LW then
 					v_output.use_mem := '1';
 					v_mem_req.active := '1';
-					v_mem_req.cmd := MEM_CMD_READ;
+					v_mem_req.write := '0';
 					v_mem_req.address := input.operand1;
 				elsif input.operation = OP_LED then
 					led <= input.operand1(7 downto 0);

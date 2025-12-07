@@ -16,23 +16,24 @@ end mem_subsys;
 
 
 architecture rtl of mem_subsys is
-	type ram_t is array (0 to 1023) of std_logic_vector(31 downto 0);
-	signal ram: ram_t := (others => (others => '0'));
+	component bram is
+        generic(
+            SIZE: integer := 1024;
+            ADDR_WIDTH: integer := 10;
+            COL_WIDTH: integer := 8;
+            NB_COL: integer := 4
+        );
+		port(
+			clka: in std_logic;
+			ena: in std_logic;
+			wea: in std_logic_vector(NB_COL - 1 downto 0);
+			addra: in std_logic_vector(ADDR_WIDTH - 1 downto 0);
+			dia: in std_logic_vector(NB_COL * COL_WIDTH - 1 downto 0);
+			doa: out std_logic_vector(NB_COL * COL_WIDTH - 1 downto 0)
+		);
+	end component;
 
 begin
+	bram_inst: bram port map(clka => clk, ena => req.active, wea => (others => req.write), addra => req.address(11 downto 2), dia => req.value, doa => res);
 
-	process (clk)
-	begin
-		if rising_edge(clk) then
-			if req.active = '1' then
-				if req.cmd = MEM_CMD_WRITE then
-					ram(to_integer(unsigned(req.address(11 downto 2)))) <= req.value;
-				else
-					res <= ram(to_integer(unsigned(req.address(11 downto 2))));
-				end if;
-			else
-				res <= (others => '0');
-			end if;
-		end if;
-	end process;
 end rtl;
