@@ -34,6 +34,6 @@ architecture rtl of mem_subsys is
 	end component;
 
 begin
-	bram_inst: bram port map(clka => clk, ena => req.active, wea => (others => req.write), addra => req.address(11 downto 2), dia => req.value, doa => res);
+	bram_inst: bram port map(clka => clk, ena => req.active, wea => req.write_enable, addra => req.address(11 downto 2), dia => req.value, doa => res);
 
 end rtl;
