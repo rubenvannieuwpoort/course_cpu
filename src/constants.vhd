@@ -7,7 +7,7 @@ use work.types.all;
 package constants is
 	constant DEFAULT_MEM_REQ: mem_req_t := (
 		active => '0',
-		write => '0',
+		write_enable => "0000",
 		address => (others => '0'),
 		value => (others => '0')
 	);

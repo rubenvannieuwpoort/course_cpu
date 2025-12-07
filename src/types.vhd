@@ -7,7 +7,7 @@ package types is
 
 	type mem_req_t is record
 		active: std_logic;
-		write: std_logic;
+		write_enable: std_logic_vector(3 downto 0);
 		address: std_logic_vector(31 downto 0);
 		value: std_logic_vector(31 downto 0);
 	end record mem_req_t;
