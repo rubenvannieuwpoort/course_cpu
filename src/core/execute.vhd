@@ -157,6 +157,7 @@ begin
 						v_mem_req.write_enable := "1000";
 					end if;
 				elsif input.operation = OP_SH then
+					-- TODO: a misaligned store should generate an exception
 					v_mem_req.active := '1';
 					v_mem_req.address := input.operand1;
 
@@ -168,12 +169,14 @@ begin
 						v_mem_req.write_enable := "1100";
 					end if;
 				elsif input.operation = OP_SW then
+					-- TODO: a misaligned store should generate an exception
 					v_mem_req.active := '1';
 					v_mem_req.write_enable := "1111";
 					v_mem_req.address := input.operand1;
 					v_mem_req.value := input.operand2;
 				elsif input.operation = OP_LB or input.operation = OP_LH or input.operation = OP_LW or
 				      input.operation = OP_LBU or input.operation = OP_LHU then
+					-- TODO: a misaligned load should generate an exception
 					v_output.use_mem := '1';
 					v_output.mem_addr := input.operand1(1 downto 0);
 
