@@ -161,7 +161,8 @@ begin
 						-- SB
 						v_decode_output.operation := OP_SB;
 					elsif funct3 = "001" then
-						-- TODO: SH
+						-- SH
+						v_decode_output.operation := OP_SH;
 					elsif funct3 = "010" then
 						-- SW
 						v_decode_output.operation := OP_SW;
