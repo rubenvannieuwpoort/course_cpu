@@ -158,7 +158,8 @@ begin
 					v_decode_output.operand2 := reg(to_integer(unsigned(rs2)));
 
 					if funct3 = "000" then
-						-- TODO: SB
+						-- SB
+						v_decode_output.operation := OP_SB;
 					elsif funct3 = "001" then
 						-- TODO: SH
 					elsif funct3 = "010" then

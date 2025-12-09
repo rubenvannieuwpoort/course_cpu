@@ -139,6 +139,23 @@ begin
 						v_jump := '1';
 						v_jump_address := input.operand3;
 					end if;
+				elsif input.operation = OP_SB then
+					v_mem_req.active := '1';
+					v_mem_req.address := input.operand1;
+
+					if input.operand1(1 downto 0) = "00" then
+						v_mem_req.value := x"000000" & input.operand2(7 downto 0);
+						v_mem_req.write_enable := "0001";
+					elsif input.operand1(1 downto 0) = "01" then
+						v_mem_req.value := x"0000" & input.operand2(7 downto 0) & x"00";
+						v_mem_req.write_enable := "0010";
+					elsif input.operand1(1 downto 0) = "10" then
+						v_mem_req.value := x"00" & input.operand2(7 downto 0) & x"0000";
+						v_mem_req.write_enable := "0100";
+					else
+						v_mem_req.value := input.operand2(7 downto 0) & x"000000";
+						v_mem_req.write_enable := "1000";
+					end if;
 				elsif input.operation = OP_SW then
 					v_mem_req.active := '1';
 					v_mem_req.write_enable := "1111";
