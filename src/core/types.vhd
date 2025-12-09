@@ -44,10 +44,16 @@ package core_types is
 		destination_reg: std_logic_vector(4 downto 0);
 	end record decode_output_t;
 
+	type read_size_t is (SIZE_WORD, SIZE_HALFWORD, SIZE_BYTE);
+
 	type execute_output_t is record
 		is_active: std_logic;
-		use_mem: std_logic;
 		result: std_logic_vector(31 downto 0);
 		destination_reg: std_logic_vector(4 downto 0);
+		
+		use_mem: std_logic;
+		mem_sign_extend: std_logic;
+		mem_size: read_size_t;
+		mem_addr: std_logic_vector(1 downto 0);
 	end record execute_output_t;
 end package core_types;

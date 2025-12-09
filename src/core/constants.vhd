@@ -23,8 +23,11 @@ package core_constants is
 
 	constant DEFAULT_EXECUTE_OUTPUT: execute_output_t := (
 		is_active => '0',
-		use_mem => '0',
 		result => (others => '0'),
-		destination_reg => (others => '0')
+		destination_reg => (others => '0'),
+		use_mem => '0',
+		mem_sign_extend => '0',
+		mem_size => SIZE_WORD,
+		mem_addr => "00"
 	);
 end package core_constants;
