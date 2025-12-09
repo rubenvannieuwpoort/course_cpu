@@ -61,7 +61,13 @@ begin
 
 				v_mem_result(31 downto 8) := (others => '0');
 			elsif write_input.mem_size = SIZE_HALFWORD then
-				-- TODO
+				if write_input.mem_addr = "00" then
+					v_mem_result(15 downto 0) := mem_res(15 downto 0);
+				else
+					v_mem_result(15 downto 0) := mem_res(31 downto 16);
+				end if;
+
+				v_mem_result(31 downto 16) := (others => '0');
 			elsif write_input.mem_size = SIZE_WORD then
 				v_mem_result := mem_res;
 			else
@@ -172,7 +178,8 @@ begin
 						-- LBU
 						v_decode_output.operation := OP_LBU;
 					elsif funct3 = "101" then
-						-- TODO: LHU
+						-- LHU
+						v_decode_output.operation := OP_LHU;
 					else
 						v_decode_output.is_invalid := '1';
 					end if;
