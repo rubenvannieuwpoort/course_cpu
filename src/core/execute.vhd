@@ -197,6 +197,13 @@ begin
 					v_output.mem_addr := input.operand1(1 downto 0);
 					v_mem_req.active := '1';
 					v_mem_req.address := input.operand1;
+				elsif input.operation = OP_LH then
+					v_output.use_mem := '1';
+					v_output.mem_size := SIZE_HALFWORD;
+					v_output.mem_sign_extend := '1';
+					v_output.mem_addr := input.operand1(1 downto 0);
+					v_mem_req.active := '1';
+					v_mem_req.address := input.operand1;
 					v_mem_req.active := '1';
 					v_mem_req.address := input.operand1;
 				elsif input.operation = OP_LED then
