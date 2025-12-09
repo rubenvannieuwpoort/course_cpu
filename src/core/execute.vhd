@@ -184,6 +184,13 @@ begin
 					v_output.mem_addr := input.operand1(1 downto 0);
 					v_mem_req.active := '1';
 					v_mem_req.address := input.operand1;
+				elsif input.operation = OP_LB then
+					v_output.use_mem := '1';
+					v_output.mem_size := SIZE_BYTE;
+					v_output.mem_sign_extend := '1';
+					v_output.mem_addr := input.operand1(1 downto 0);
+					v_mem_req.active := '1';
+					v_mem_req.address := input.operand1;
 				elsif input.operation = OP_LHU then
 					v_output.use_mem := '1';
 					v_output.mem_size := SIZE_HALFWORD;

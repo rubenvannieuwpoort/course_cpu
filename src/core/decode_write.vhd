@@ -59,7 +59,11 @@ begin
 					v_mem_result(7 downto 0) := mem_res(31 downto 24);
 				end if;
 
-				v_mem_result(31 downto 8) := (others => '0');
+				if write_input.mem_sign_extend = '1' then
+					v_mem_result(31 downto 8) := (others => v_mem_result(7));
+				else
+					v_mem_result(31 downto 8) := (others => '0');
+				end if;
 			elsif write_input.mem_size = SIZE_HALFWORD then
 				if write_input.mem_addr = "00" then
 					v_mem_result(15 downto 0) := mem_res(15 downto 0);
@@ -168,7 +172,8 @@ begin
 					v_decode_output.destination_reg := rd;
 
 					if funct3 = "000" then
-						-- TODO: LB
+						-- LB
+						v_decode_output.operation := OP_LB;
 					elsif funct3 = "001" then
 						-- TODO: LH
 					elsif funct3 = "010" then
