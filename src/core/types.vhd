@@ -21,6 +21,7 @@ package core_types is
 		OP_BGE,
 		OP_BLTU,
 		OP_BGEU,
+		OP_SB,
 		OP_SW,
 		OP_LW,
 		OP_LED
