@@ -174,6 +174,10 @@ begin
 					v_mem_req.value := input.operand2;
 				elsif input.operation = OP_LW then
 					v_output.use_mem := '1';
+					v_output.mem_size := SIZE_WORD;
+					v_output.mem_addr := input.operand1(1 downto 0);
+					v_mem_req.active := '1';
+					v_mem_req.address := input.operand1;
 					v_mem_req.active := '1';
 					v_mem_req.address := input.operand1;
 				elsif input.operation = OP_LED then

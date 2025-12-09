@@ -43,12 +43,25 @@ begin
 		variable u_imm: std_logic_vector(31 downto 0);
 
 		variable v_decode_output: decode_output_t;
+
+		variable v_mem_result: std_logic_vector(31 downto 0);
 	begin
 		if rising_edge(clk) then
+			-- handle endianness of memory reads
+			if write_input.mem_size = SIZE_BYTE then
+				-- TODO
+			elsif write_input.mem_size = SIZE_HALFWORD then
+				-- TODO
+			elsif write_input.mem_size = SIZE_WORD then
+				v_mem_result := mem_res;
+			else
+				assert false report "Unhandled memory read size in writeback stage" severity failure;
+			end if;
+
 			-- write back result if the destination register is not x0 (which always stays 0)
 			if write_input.destination_reg /= "00000" then
 				if write_input.use_mem = '1' then
-					reg(to_integer(unsigned(write_input.destination_reg))) <= mem_res;
+					reg(to_integer(unsigned(write_input.destination_reg))) <= v_mem_result;
 				else
 					reg(to_integer(unsigned(write_input.destination_reg))) <= write_input.result;
 				end if;
