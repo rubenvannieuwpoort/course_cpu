@@ -49,7 +49,17 @@ begin
 		if rising_edge(clk) then
 			-- handle endianness of memory reads
 			if write_input.mem_size = SIZE_BYTE then
-				-- TODO
+				if write_input.mem_addr = "00" then
+					v_mem_result(7 downto 0) := mem_res(7 downto 0);
+				elsif write_input.mem_addr = "01" then
+					v_mem_result(7 downto 0) := mem_res(15 downto 8);
+				elsif write_input.mem_addr = "10" then
+					v_mem_result(7 downto 0) := mem_res(23 downto 16);
+				else
+					v_mem_result(7 downto 0) := mem_res(31 downto 24);
+				end if;
+
+				v_mem_result(31 downto 8) := (others => '0');
 			elsif write_input.mem_size = SIZE_HALFWORD then
 				-- TODO
 			elsif write_input.mem_size = SIZE_WORD then
@@ -159,7 +169,8 @@ begin
 						-- LW
 						v_decode_output.operation := OP_LW;
 					elsif funct3 = "100" then
-						-- TODO: LBU
+						-- LBU
+						v_decode_output.operation := OP_LBU;
 					elsif funct3 = "101" then
 						-- TODO: LHU
 					else
