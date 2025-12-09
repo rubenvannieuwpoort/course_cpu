@@ -156,6 +156,17 @@ begin
 						v_mem_req.value := input.operand2(7 downto 0) & x"000000";
 						v_mem_req.write_enable := "1000";
 					end if;
+				elsif input.operation = OP_SH then
+					v_mem_req.active := '1';
+					v_mem_req.address := input.operand1;
+
+					if input.operand1(1 downto 0) = "00" then
+						v_mem_req.value := x"0000" & input.operand2(15 downto 0);
+						v_mem_req.write_enable := "0011";
+					else
+						v_mem_req.value := input.operand2(15 downto 0) & x"0000";
+						v_mem_req.write_enable := "1100";
+					end if;
 				elsif input.operation = OP_SW then
 					v_mem_req.active := '1';
 					v_mem_req.write_enable := "1111";
