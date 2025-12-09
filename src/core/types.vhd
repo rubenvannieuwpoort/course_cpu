@@ -24,6 +24,7 @@ package core_types is
 		OP_SB,
 		OP_SH,
 		OP_SW,
+		OP_LB,
 		OP_LW,
 		OP_LBU,
 		OP_LHU,
