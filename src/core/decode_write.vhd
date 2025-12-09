@@ -71,7 +71,11 @@ begin
 					v_mem_result(15 downto 0) := mem_res(31 downto 16);
 				end if;
 
-				v_mem_result(31 downto 16) := (others => '0');
+				if write_input.mem_sign_extend = '1' then
+					v_mem_result(31 downto 16) := (others => v_mem_result(15));
+				else
+					v_mem_result(31 downto 16) := (others => '0');
+				end if;
 			elsif write_input.mem_size = SIZE_WORD then
 				v_mem_result := mem_res;
 			else
@@ -175,7 +179,8 @@ begin
 						-- LB
 						v_decode_output.operation := OP_LB;
 					elsif funct3 = "001" then
-						-- TODO: LH
+						-- LH
+						v_decode_output.operation := OP_LH;
 					elsif funct3 = "010" then
 						-- LW
 						v_decode_output.operation := OP_LW;
