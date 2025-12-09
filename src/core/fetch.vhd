@@ -18,10 +18,12 @@ end fetch;
 
 
 architecture rtl of fetch is
-	type instruction_memory_t is array(0 to 15) of std_logic_vector(31 downto 0);
+	type instruction_memory_t is array(0 to 31) of std_logic_vector(31 downto 0);
 	signal imem: instruction_memory_t := (
-		X"00209113", X"00112023", X"00012283", X"00108093", X"ff1ff06f", X"00000000", X"00000000", X"00000000",
-		X"0000006f", X"00000000", X"00000000", X"00000000", X"00000000", X"00000000", X"00000000", X"00000000"
+		X"deadc0b7", X"eef08093", X"00102023", X"00101223", X"00101523", X"00100623", X"001008a3", X"00100b23",
+		X"00100da3", X"00002103", X"00405183", X"00a05203", X"00c04283", X"01104303", X"01604383", X"01b04403",
+		X"00401483", X"00a01503", X"00c00583", X"01100603", X"01600683", X"01b00703", X"0000006f", X"00000000",
+		X"00000000", X"00000000", X"00000000", X"00000000", X"00000000", X"00000000", X"00000000", X"00000000"
 	);
 
 	signal pc: unsigned(31 downto 0) := (others => '0');
@@ -35,7 +37,7 @@ begin
 				pc <= pc + 4;
 
 				output.is_active <= '1';
-				output.instr <= imem(to_integer(pc(5 downto 2)));
+				output.instr <= imem(to_integer(pc(6 downto 2)));
 				output.pc <= std_logic_vector(pc);
 
 				assert jump = '0' report "Fetching and jumping at the same cycle is not supported";
