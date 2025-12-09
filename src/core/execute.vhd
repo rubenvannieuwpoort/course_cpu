@@ -172,40 +172,25 @@ begin
 					v_mem_req.write_enable := "1111";
 					v_mem_req.address := input.operand1;
 					v_mem_req.value := input.operand2;
-				elsif input.operation = OP_LW then
+				elsif input.operation = OP_LB or input.operation = OP_LH or input.operation = OP_LW or
+				      input.operation = OP_LBU or input.operation = OP_LHU then
 					v_output.use_mem := '1';
-					v_output.mem_size := SIZE_WORD;
 					v_output.mem_addr := input.operand1(1 downto 0);
+
 					v_mem_req.active := '1';
 					v_mem_req.address := input.operand1;
-				elsif input.operation = OP_LBU then
-					v_output.use_mem := '1';
-					v_output.mem_size := SIZE_BYTE;
-					v_output.mem_addr := input.operand1(1 downto 0);
-					v_mem_req.active := '1';
-					v_mem_req.address := input.operand1;
-				elsif input.operation = OP_LB then
-					v_output.use_mem := '1';
-					v_output.mem_size := SIZE_BYTE;
-					v_output.mem_sign_extend := '1';
-					v_output.mem_addr := input.operand1(1 downto 0);
-					v_mem_req.active := '1';
-					v_mem_req.address := input.operand1;
-				elsif input.operation = OP_LHU then
-					v_output.use_mem := '1';
-					v_output.mem_size := SIZE_HALFWORD;
-					v_output.mem_addr := input.operand1(1 downto 0);
-					v_mem_req.active := '1';
-					v_mem_req.address := input.operand1;
-				elsif input.operation = OP_LH then
-					v_output.use_mem := '1';
-					v_output.mem_size := SIZE_HALFWORD;
-					v_output.mem_sign_extend := '1';
-					v_output.mem_addr := input.operand1(1 downto 0);
-					v_mem_req.active := '1';
-					v_mem_req.address := input.operand1;
-					v_mem_req.active := '1';
-					v_mem_req.address := input.operand1;
+
+					if input.operation = OP_LB or input.operation = OP_LH then
+						v_output.mem_sign_extend := '1';
+					end if;
+
+					if input.operation = OP_LB or input.operation = OP_LBU then
+						v_output.mem_size := SIZE_BYTE;
+					elsif input.operation = OP_LH or input.operation = OP_LHU then
+						v_output.mem_size := SIZE_HALFWORD;
+					else
+						v_output.mem_size := SIZE_WORD;
+					end if;
 				elsif input.operation = OP_LED then
 					led <= input.operand1(7 downto 0);
 				else
