@@ -7,7 +7,7 @@ use work.core_types.all;
 package core_constants is
 	constant DEFAULT_FETCH_OUTPUT: fetch_output_t := (
 		is_active => '0',
-		instr => (others => '0'),
+		instr => (others => 'Z'),
 		pc => (others => '0')
 	);
 
