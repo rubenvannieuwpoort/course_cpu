@@ -9,8 +9,10 @@ use work.constants.all;
 entity mem_subsys is
 	port (
 		clk: in std_logic;
-		req: in mem_req_t;
-		res: out std_logic_vector(31 downto 0)
+		req_1: in mem_req_t;
+		req_2: in mem_read_req_t;
+		res_1: out std_logic_vector(31 downto 0);
+		res_2: out std_logic_vector(31 downto 0)
 	);
 end mem_subsys;
 
@@ -39,8 +41,8 @@ architecture rtl of mem_subsys is
 
 begin
 	bram_inst: bram port map(
-		clka => clk, ena => req.active, wea => req.write_enable, addra => req.address(11 downto 2), dia => req.value, doa => res,
-		clkb => clk, enb => '0', addrb => (others => '0')
+		clka => clk, ena => req_1.active, wea => req_1.write_enable, addra => req_1.address(11 downto 2), dia => req_1.value, doa => res_1,
+		clkb => clk, enb => req_2.active, addrb => req_2.address(11 downto 2)
 	);
 
 end rtl;

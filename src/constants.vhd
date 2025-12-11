@@ -11,4 +11,9 @@ package constants is
 		address => (others => '0'),
 		value => (others => '0')
 	);
+
+	constant DEFAULT_MEM_READ_REQ: mem_read_req_t := (
+		active => '0',
+		address => (others => '0')
+	);
 end package constants;
