@@ -16,12 +16,12 @@ entity bram is
 		addra: in std_logic_vector(ADDR_WIDTH - 1 downto 0);
 		dia: in std_logic_vector(NB_COL * COL_WIDTH - 1 downto 0);
 		doa: out std_logic_vector(NB_COL * COL_WIDTH - 1 downto 0)
-		-- clkb: in std_logic;
-		-- enb: in std_logic;
-		-- web: in std_logic_vector(NB_COL - 1 downto 0);
-		-- addrb: in std_logic_vector(ADDR_WIDTH - 1 downto 0);
-		-- dib: in std_logic_vector(NB_COL * COL_WIDTH - 1 downto 0);
-		-- dob: out std_logic_vector(NB_COL * COL_WIDTH - 1 downto 0)
+		clkb: in std_logic;
+		enb: in std_logic;
+		web: in std_logic_vector(NB_COL - 1 downto 0);
+		addrb: in std_logic_vector(ADDR_WIDTH - 1 downto 0);
+		dib: in std_logic_vector(NB_COL * COL_WIDTH - 1 downto 0);
+		dob: out std_logic_vector(NB_COL * COL_WIDTH - 1 downto 0)
 	);
 end bram;
 
@@ -48,17 +48,17 @@ begin
 	end process;
 
 	-- port B
-	-- process(clkb)
-	-- begin
-	-- 	if rising_edge(clkb) then
-	-- 		if enb = '1' then
-	-- 			for i in 0 to NB_COL - 1 loop
-	-- 				if web(i) = '1' then
-	-- 					RAM(conv_integer(addrb))((i + 1) * COL_WIDTH - 1 downto i * COL_WIDTH) := dib((i + 1) * COL_WIDTH - 1 downto i * COL_WIDTH);
-	-- 				end if;
-	-- 			end loop;
-	-- 			dob <= RAM(conv_integer(addrb));
-	-- 		end if;
-	-- 	end if;
-	-- end process;
+	process(clkb)
+	begin
+		if rising_edge(clkb) then
+			if enb = '1' then
+				for i in 0 to NB_COL - 1 loop
+					if web(i) = '1' then
+						RAM(conv_integer(addrb))((i + 1) * COL_WIDTH - 1 downto i * COL_WIDTH) := dib((i + 1) * COL_WIDTH - 1 downto i * COL_WIDTH);
+					end if;
+				end loop;
+				dob <= RAM(conv_integer(addrb));
+			end if;
+		end if;
+	end process;
 end rtl;
