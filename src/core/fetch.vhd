@@ -33,6 +33,8 @@ architecture rtl of fetch is
 	signal pc: unsigned(31 downto 0) := (others => '0');
 
 begin
+	mem_req.active <= pipeline_ready;
+	mem_req.address <= std_logic_vector(pc);
 
 	process (clk)
 	begin
