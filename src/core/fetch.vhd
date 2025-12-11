@@ -2,6 +2,9 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
+use work.types.all;
+use work.constants.all;
+
 use work.core_types.all;
 use work.core_constants.all;
 
@@ -12,6 +15,7 @@ entity fetch is
 		pipeline_ready: in std_logic;
 		jump: in std_logic;
 		jump_address: in std_logic_vector(31 downto 0);
+		mem_req: out mem_read_req_t := DEFAULT_MEM_READ_REQ;
 		output: out fetch_output_t := DEFAULT_FETCH_OUTPUT
 	);
 end fetch;
