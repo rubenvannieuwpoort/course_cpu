@@ -42,7 +42,7 @@ architecture rtl of mem_subsys is
 begin
 	bram_inst: bram port map(
 		clka => clk, ena => req_1.active, wea => req_1.write_enable, addra => req_1.address(11 downto 2), dia => req_1.value, doa => res_1,
-		clkb => clk, enb => req_2.active, addrb => req_2.address(11 downto 2)
+		clkb => clk, enb => req_2.active, addrb => req_2.address(11 downto 2), dob => res_2
 	);
 
 end rtl;

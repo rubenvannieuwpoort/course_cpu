@@ -3,6 +3,7 @@ use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
 use work.types.all;
+use work.constants.all;
 
 use work.core_types.all;
 use work.core_constants.all;
@@ -11,8 +12,10 @@ use work.core_constants.all;
 entity core is
 	port (
 		clk: in std_logic;
-		mem_req: out mem_req_t;
-		mem_res: in std_logic_vector(31 downto 0);
+		mem_req_1: out mem_req_t;
+		mem_req_2: out mem_read_req_t := DEFAULT_MEM_READ_REQ;
+		mem_res_1: in std_logic_vector(31 downto 0);
+		mem_res_2: in std_logic_vector(31 downto 0);
 		led: out std_logic_vector(7 downto 0)
 	);
 end core;
@@ -71,9 +74,9 @@ architecture rtl of core is
 begin
 	fetch_inst: fetch port map(clk => clk, pipeline_ready => pipeline_ready, jump => jump, jump_address => jump_address, output => fetch_output);
 
-	decode_write_inst: decode_write port map(clk => clk, decode_input => fetch_output, decode_output => decode_output, write_input => memory_output, mem_res => mem_res, pipeline_ready => pipeline_ready);
+	decode_write_inst: decode_write port map(clk => clk, decode_input => fetch_output, decode_output => decode_output, write_input => memory_output, mem_res => mem_res_1, pipeline_ready => pipeline_ready);
 
-	execute_inst: execute port map(clk => clk, input => decode_output, output => execute_output, mem_req => mem_req, jump => jump, jump_address => jump_address, led => led);
+	execute_inst: execute port map(clk => clk, input => decode_output, output => execute_output, mem_req => mem_req_1, jump => jump, jump_address => jump_address, led => led);
 
 	memory_inst: memory port map(clk => clk, input => execute_output, output => memory_output);
 
