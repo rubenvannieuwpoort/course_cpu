@@ -11,4 +11,9 @@ package types is
 		address: std_logic_vector(31 downto 0);
 		value: std_logic_vector(31 downto 0);
 	end record mem_req_t;
+
+	type mem_read_req_t is record
+		active: std_logic;
+		address: std_logic_vector(31 downto 0);
+	end record mem_read_req_t;
 end package types;
