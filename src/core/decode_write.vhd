@@ -301,18 +301,33 @@ begin
 				elsif i_imm = "000000000001" and rs1 = "00000" and funct3 = "000" and rd = "00000" and opcode = "1110011" then
 					-- EBREAK
 				elsif opcode = "1110011" then
+					v_decode_output.operand2 := "00000000000000000000" & i_imm;  -- store CSR register in operand 2
+					v_decode_output.destination_reg := rd;
+
 					if funct3 = "001" then
-						-- TODO: CSRRW
+						-- CSRRW
+						v_decode_output.operation := OP_CSRRW;
+						v_decode_output.operand1 := reg(to_integer(unsigned(rs1)));
 					elsif funct3 = "010" then
-						-- TODO: CSRRS
+						-- CSRRS
+						v_decode_output.operation := OP_CSRRS;
+						v_decode_output.operand1 := reg(to_integer(unsigned(rs1)));
 					elsif funct3 = "011" then
-						-- TODO: CSRRC
+						-- CSRRC
+						v_decode_output.operation := OP_CSRRC;
+						v_decode_output.operand1 := reg(to_integer(unsigned(rs1)));
 					elsif funct3 = "101" then
-						-- TODO: CSRRWI
+						-- CSRRWI
+						v_decode_output.operation := OP_CSRRW;
+						v_decode_output.operand1 := "000000000000000000000000000" & rs1;
 					elsif funct3 = "110" then
-						-- TODO: CSRRSI
+						-- CSRRSI
+						v_decode_output.operation := OP_CSRRS;
+						v_decode_output.operand1 := "000000000000000000000000000" & rs1;
 					elsif funct3 = "111" then
-						-- TODO: CSRRCI
+						-- CSRRCI
+						v_decode_output.operation := OP_CSRRC;
+						v_decode_output.operand1 := "000000000000000000000000000" & rs1;
 					else
 						v_decode_output.is_invalid := '1';
 					end if;

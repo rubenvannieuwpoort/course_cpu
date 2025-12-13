@@ -29,6 +29,9 @@ package core_types is
 		OP_LW,
 		OP_LBU,
 		OP_LHU,
+		OP_CSRRW,
+		OP_CSRRS,
+		OP_CSRRC,
 		OP_LED
 	);
 
