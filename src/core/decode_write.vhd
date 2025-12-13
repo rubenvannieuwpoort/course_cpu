@@ -300,6 +300,22 @@ begin
 					-- ECALL
 				elsif i_imm = "000000000001" and rs1 = "00000" and funct3 = "000" and rd = "00000" and opcode = "1110011" then
 					-- EBREAK
+				elsif opcode = "1110011" then
+					if funct3 = "001" then
+						-- TODO: CSRRW
+					elsif funct3 = "010" then
+						-- TODO: CSRRS
+					elsif funct3 = "011" then
+						-- TODO: CSRRC
+					elsif funct3 = "101" then
+						-- TODO: CSRRWI
+					elsif funct3 = "110" then
+						-- TODO: CSRRSI
+					elsif funct3 = "111" then
+						-- TODO: CSRRCI
+					else
+						v_decode_output.is_invalid := '1';
+					end if;
 				elsif opcode = "1111111" and funct3 = "000" then
 					-- LED (custom instruction): set the LEDs to the 8 least significant bits of rs1
 					v_decode_output.operation := OP_LED;
