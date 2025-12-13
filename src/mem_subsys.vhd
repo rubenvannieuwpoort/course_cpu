@@ -23,20 +23,20 @@ architecture rtl of mem_subsys is
 			clka: in std_logic;
 			ena: in std_logic;
 			wea: in std_logic_vector(3 downto 0);
-			addra: in std_logic_vector(9 downto 0);
+			addra: in std_logic_vector(11 downto 0);
 			dia: in std_logic_vector(31 downto 0);
 			doa: out std_logic_vector(31 downto 0);
 			clkb: in std_logic;
 			enb: in std_logic;
-			addrb: in std_logic_vector(9 downto 0);
+			addrb: in std_logic_vector(11 downto 0);
 			dob: out std_logic_vector(31 downto 0)
 		);
 	end component;
 
 begin
 	bram_inst: bram port map(
-		clka => clk, ena => req_1.active, wea => req_1.write_enable, addra => req_1.address(11 downto 2), dia => req_1.value, doa => res_1,
-		clkb => clk, enb => req_2.active, addrb => req_2.address(11 downto 2), dob => res_2
+		clka => clk, ena => req_1.active, wea => req_1.write_enable, addra => req_1.address(13 downto 2), dia => req_1.value, doa => res_1,
+		clkb => clk, enb => req_2.active, addrb => req_2.address(13 downto 2), dob => res_2
 	);
 
 end rtl;
