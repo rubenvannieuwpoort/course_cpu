@@ -31,6 +31,7 @@ architecture rtl of execute is
 	signal mepc: std_logic_vector(29 downto 0) := (others => '0');
 	signal mcause_int: std_logic := '0';
 	signal mcause_code: std_logic_vector(5 downto 0) := (others => '0');
+	signal mtval: std_logic_vector(31 downto 0) := (others => '0');
 begin
 
 	process (clk)
@@ -244,6 +245,9 @@ begin
 						v_output.result := mcause_int & "0000000000000000000000000" & mcause_code;
 						mcause_int <= (mcause_int or csr_set_bits(31)) and csr_clear_bits(31);
 						mcause_code <= (mcause_code or csr_set_bits(5 downto 0)) and csr_clear_bits(5 downto 0);
+					elsif input.operand2(11 downto 0) = CSR_MTVAL then
+						v_output.result := mtval;
+						mtval <= (mtval or csr_set_bits) and csr_clear_bits;
 					elsif input.csr_read_only = '1' then
 						-- read-only CSRs
 						if input.operand2(11 downto 0) = CSR_MVENDORID then
