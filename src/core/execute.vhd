@@ -32,6 +32,8 @@ begin
 		variable v_jump_address: std_logic_vector(31 downto 0);
 		variable v_mem_req: mem_req_t;
 		
+		variable csr_set_bits, csr_clear_bits: std_logic_vector(31 downto 0);
+
 	begin
 		if rising_edge(clk) then
 			v_output := DEFAULT_EXECUTE_OUTPUT;
@@ -194,6 +196,21 @@ begin
 					else
 						v_output.mem_size := SIZE_WORD;
 					end if;
+				elsif input.operation = OP_CSRRW or input.operation = OP_CSRRS or input.operation = OP_CSRRC then
+					if input.operation = OP_CSRRW then
+						csr_set_bits := input.operand1;
+						csr_clear_bits := input.operand1;
+					elsif input.operation = OP_CSRRS then
+						csr_set_bits := input.operand1;
+						csr_clear_bits := (others => '1');
+					elsif input.operation = OP_CSRRC then
+						csr_clear_bits := not input.operand1;
+					else
+						assert false report "Unhandled CSR operation in execute stage" severity failure;
+					end if;
+
+					-- TODO: implementations for different registers
+
 				elsif input.operation = OP_LED then
 					led <= input.operand1(7 downto 0);
 				else
