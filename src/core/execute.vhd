@@ -35,6 +35,8 @@ architecture rtl of execute is
 	signal mip: std_logic_vector(15 downto 0) := (others => '0');
 	signal mcycle: std_logic_vector(31 downto 0) := (others => '0');
 	signal minstret: std_logic_vector(31 downto 0) := (others => '0');
+	signal mcycleh: std_logic_vector(31 downto 0) := (others => '0');
+	signal minstreth: std_logic_vector(31 downto 0) := (others => '0');
 begin
 
 	process (clk)
@@ -262,6 +264,12 @@ begin
 						minstret <= (minstret or csr_set_bits) and csr_clear_bits;
 					elsif unsigned(CSR_MHPMCOUNTER3) <= unsigned(input.operand2(11 downto 0)) and unsigned(input.operand2(11 downto 0)) <= unsigned(CSR_MHPMCOUNTER31) then
 						v_output.result := (others => '0');
+					elsif input.operand2(11 downto 0) = CSR_MCYCLEH then
+						v_output.result := mcycleh;
+						mcycleh <= (mcycleh or csr_set_bits) and csr_clear_bits;
+					elsif input.operand2(11 downto 0) = CSR_MINSTRETH then
+						v_output.result := minstreth;
+						minstreth <= (minstreth or csr_set_bits) and csr_clear_bits;
 					elsif input.csr_read_only = '1' then
 						-- read-only CSRs
 						if input.operand2(11 downto 0) = CSR_MVENDORID then
