@@ -75,4 +75,6 @@ package core_constants is
 	constant MIMPID_VALUE: std_logic_vector(31 downto 0) := X"00000000";
 	constant MHARTID_VALUE: std_logic_vector(31 downto 0) := X"00000000";
 	constant MCONFIGPTR_VALUE: std_logic_vector(31 downto 0) := X"00000000";
+
+	constant MISA_VALUE: std_logic_vector(31 downto 0) := X"40000100";  -- 32-bit RVI
 end package core_constants;
