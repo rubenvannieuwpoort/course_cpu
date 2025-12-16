@@ -28,6 +28,7 @@ architecture rtl of execute is
 	signal mtvec_address: std_logic_vector(29 downto 0) := (others => '0');
 	signal mtvec_mode: std_logic := '0';
 	signal mscratch: std_logic_vector(31 downto 0) := (others => '0');
+	signal mepc: std_logic_vector(29 downto 0) := (others => '0');
 begin
 
 	process (clk)
@@ -234,6 +235,9 @@ begin
 					elsif input.operand2(11 downto 0) = CSR_MSCRATCH then
 						v_output.result := mscratch;
 						mscratch <= (mscratch or csr_set_bits) and csr_clear_bits;
+					elsif input.operand2(11 downto 0) = CSR_MEPC then
+						v_output.result := mepc & "00";
+						mepc <= (mepc or csr_set_bits(31 downto 2)) and csr_clear_bits(31 downto 2);
 					elsif input.csr_read_only = '1' then
 						-- read-only CSRs
 						if input.operand2(11 downto 0) = CSR_MVENDORID then
