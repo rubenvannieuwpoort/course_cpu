@@ -23,6 +23,7 @@ end execute;
 
 
 architecture rtl of execute is
+	signal mstatus_mpie, mstatus_mie: std_logic := '0';
 begin
 
 	process (clk)
@@ -211,7 +212,11 @@ begin
 
 					-- TODO: implementations for CSR read-write registers
 
-					if input.csr_read_only = '1' then
+					if input.operand2(11 downto 0) = CSR_MSTATUS then
+						v_output.result := "000000000000000000011000" & mstatus_mpie & "000" & mstatus_mie & "000";
+						mstatus_mie <= (mstatus_mie or csr_set_bits(3)) and csr_clear_bits(3);
+						mstatus_mpie <= (mstatus_mpie or csr_set_bits(7)) and csr_clear_bits(7);
+					elsif input.csr_read_only = '1' then
 						-- read-only CSRs
 						if input.operand2(11 downto 0) = CSR_MVENDORID then
 							v_output.result := MVENDORID_VALUE;
