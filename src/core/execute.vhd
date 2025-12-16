@@ -272,6 +272,10 @@ begin
 						minstreth <= (minstreth or csr_set_bits) and csr_clear_bits;
 					elsif unsigned(CSR_MHPMCOUNTER3H) <= unsigned(input.operand2(11 downto 0)) and unsigned(input.operand2(11 downto 0)) <= unsigned(CSR_MHPMCOUNTER31H) then
 						v_output.result := (others => '0');
+					elsif unsigned(CSR_MHPMEVENT3) <= unsigned(input.operand2(11 downto 0)) and unsigned(input.operand2(11 downto 0)) <= unsigned(CSR_MHPMEVENT31) then
+						v_output.result := (others => '0');
+					elsif unsigned(CSR_MHPMEVENT3H) <= unsigned(input.operand2(11 downto 0)) and unsigned(input.operand2(11 downto 0)) <= unsigned(CSR_MHPMEVENT31H) then
+						v_output.result := (others => '0');
 					elsif input.csr_read_only = '1' then
 						-- read-only CSRs
 						if input.operand2(11 downto 0) = CSR_MVENDORID then
