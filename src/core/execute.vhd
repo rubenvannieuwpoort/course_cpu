@@ -24,6 +24,7 @@ end execute;
 
 architecture rtl of execute is
 	signal mstatus_mpie, mstatus_mie: std_logic := '0';
+	signal mie: std_logic_vector(15 downto 0) := (others => '0');
 begin
 
 	process (clk)
@@ -218,6 +219,9 @@ begin
 						mstatus_mpie <= (mstatus_mpie or csr_set_bits(7)) and csr_clear_bits(7);
 					elsif input.operand2(11 downto 0) = CSR_MISA then
 						v_output.result := MISA_VALUE;
+					elsif input.operand2(11 downto 0) = CSR_MIE then
+						v_output.result := x"0000" & mie;
+						mie <= (mie or csr_set_bits(15 downto 0)) and csr_clear_bits(15 downto 0);
 					elsif input.csr_read_only = '1' then
 						-- read-only CSRs
 						if input.operand2(11 downto 0) = CSR_MVENDORID then
