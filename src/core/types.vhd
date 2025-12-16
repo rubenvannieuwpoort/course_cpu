@@ -49,6 +49,7 @@ package core_types is
 		operand2: std_logic_vector(31 downto 0);
 		operand3: std_logic_vector(31 downto 0);
 		destination_reg: std_logic_vector(4 downto 0);
+		csr_read_only: std_logic;
 	end record decode_output_t;
 
 	type read_size_t is (SIZE_WORD, SIZE_HALFWORD, SIZE_BYTE);

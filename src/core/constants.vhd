@@ -18,7 +18,8 @@ package core_constants is
 		operand1 => (others => '0'),
 		operand2 => (others => '0'),
 		operand3 => (others => '0'),
-		destination_reg => (others => '0')
+		destination_reg => (others => '0'),
+		csr_read_only => '0'
 	);
 
 	constant DEFAULT_EXECUTE_OUTPUT: execute_output_t := (

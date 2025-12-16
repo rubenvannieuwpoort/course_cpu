@@ -312,10 +312,16 @@ begin
 						-- CSRRS
 						v_decode_output.operation := OP_CSRRS;
 						v_decode_output.operand1 := reg(to_integer(unsigned(rs1)));
+						if rs1 = "00000" then
+							v_decode_output.csr_read_only := '1';
+						end if;
 					elsif funct3 = "011" then
 						-- CSRRC
 						v_decode_output.operation := OP_CSRRC;
 						v_decode_output.operand1 := reg(to_integer(unsigned(rs1)));
+						if rs1 = "00000" then
+							v_decode_output.csr_read_only := '1';
+						end if;
 					elsif funct3 = "101" then
 						-- CSRRWI
 						v_decode_output.operation := OP_CSRRW;
@@ -324,10 +330,16 @@ begin
 						-- CSRRSI
 						v_decode_output.operation := OP_CSRRS;
 						v_decode_output.operand1 := "000000000000000000000000000" & rs1;
+						if rs1 = "00000" then
+							v_decode_output.csr_read_only := '1';
+						end if;
 					elsif funct3 = "111" then
 						-- CSRRCI
 						v_decode_output.operation := OP_CSRRC;
 						v_decode_output.operand1 := "000000000000000000000000000" & rs1;
+						if rs1 = "00000" then
+							v_decode_output.csr_read_only := '1';
+						end if;
 					else
 						v_decode_output.is_invalid := '1';
 					end if;
