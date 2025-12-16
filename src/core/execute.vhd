@@ -228,6 +228,8 @@ begin
 						v_output.result := mtvec_address & "0" & mtvec_mode;
 						mtvec_address <= (mtvec_address or csr_set_bits(31 downto 2)) and csr_clear_bits(31 downto 2);
 						mtvec_mode <= (mtvec_mode or csr_set_bits(0)) and csr_clear_bits(0);
+					elsif input.operand2(11 downto 0) = CSR_MSTATUSH then
+						v_output.result := (others => '0');
 					elsif input.csr_read_only = '1' then
 						-- read-only CSRs
 						if input.operand2(11 downto 0) = CSR_MVENDORID then
