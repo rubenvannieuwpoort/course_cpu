@@ -209,8 +209,26 @@ begin
 						assert false report "Unhandled CSR operation in execute stage" severity failure;
 					end if;
 
-					-- TODO: implementations for different registers
+					-- TODO: implementations for CSR read-write registers
 
+					if input.csr_read_only = '1' then
+						-- read-only CSRs
+						if input.operand2(11 downto 0) = CSR_MVENDORID then
+							v_output.result := MVENDORID_VALUE;
+						elsif input.operand2(11 downto 0) = CSR_MARCHID then
+							v_output.result := MARCHID_VALUE;
+						elsif input.operand2(11 downto 0) = CSR_MIMPID then
+							v_output.result := MIMPID_VALUE;
+						elsif input.operand2(11 downto 0) = CSR_MHARTID then
+							v_output.result := MHARTID_VALUE;
+						elsif input.operand2(11 downto 0) = CSR_MCONFIGPTR then
+							v_output.result := MCONFIGPTR_VALUE;
+						else
+							-- TODO: exception; trying to read non-existent CSR
+						end if;
+					else
+						-- TODO: exception; trying to write to non-existent or read-only CSR
+					end if;
 				elsif input.operation = OP_LED then
 					led <= input.operand1(7 downto 0);
 				else

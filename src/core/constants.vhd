@@ -68,4 +68,11 @@ package core_constants is
 	constant CSR_MHPMEVENT3H: std_logic_vector(11 downto 0) := X"723";
 	-- ...
 	constant CSR_MHPMEVENT31H: std_logic_vector(11 downto 0) := X"73f";
+
+	-- hardwired values for some CSRs
+	constant MVENDORID_VALUE: std_logic_vector(31 downto 0) := X"00000000";
+	constant MARCHID_VALUE: std_logic_vector(31 downto 0) := X"00000000";
+	constant MIMPID_VALUE: std_logic_vector(31 downto 0) := X"00000000";
+	constant MHARTID_VALUE: std_logic_vector(31 downto 0) := X"00000000";
+	constant MCONFIGPTR_VALUE: std_logic_vector(31 downto 0) := X"00000000";
 end package core_constants;
