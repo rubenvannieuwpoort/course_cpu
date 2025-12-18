@@ -343,6 +343,8 @@ begin
 					else
 						v_decode_output.is_invalid := '1';
 					end if;
+				elsif funct7 = "0001000" and rs2 = "00101" and opcode = "1110011" then
+					-- WFI (implemented as NOP)
 				elsif opcode = "1111111" and funct3 = "000" then
 					-- LED (custom instruction): set the LEDs to the 8 least significant bits of rs1
 					v_decode_output.operation := OP_LED;
