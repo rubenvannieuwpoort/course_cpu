@@ -57,6 +57,7 @@ architecture rtl of core is
 		port (
 			clk: in std_logic;
 			input: in decode_output_t;
+			instr_retire: in std_logic;
 			output: out execute_output_t;
 			mem_req: out mem_req_t;
 			jump: out std_logic := '0';
@@ -78,7 +79,7 @@ begin
 
 	decode_write_inst: decode_write port map(clk => clk, decode_input => fetch_output, decode_output => decode_output, write_input => memory_output, mem_res => mem_res_1, pipeline_ready => pipeline_ready);
 
-	execute_inst: execute port map(clk => clk, input => decode_output, output => execute_output, mem_req => mem_req_1, jump => jump, jump_address => jump_address, led => led);
+	execute_inst: execute port map(clk => clk, input => decode_output, instr_retire => pipeline_ready, output => execute_output, mem_req => mem_req_1, jump => jump, jump_address => jump_address, led => led);
 
 	memory_inst: memory port map(clk => clk, input => execute_output, output => memory_output);
 

@@ -13,6 +13,7 @@ entity execute is
 	port (
 		clk: in std_logic;
 		input: in decode_output_t;
+		instr_retire: in std_logic;
 		output: out execute_output_t := DEFAULT_EXECUTE_OUTPUT;
 		mem_req: out mem_req_t := DEFAULT_MEM_REQ;
 		jump: out std_logic := '0';
@@ -46,6 +47,7 @@ begin
 		variable v_jump_address: std_logic_vector(31 downto 0);
 		variable v_mem_req: mem_req_t;
 		variable v_mcycle_next, v_mcycleh_next: std_logic_vector(31 downto 0);
+		variable v_minstret_next, v_minstreth_next: std_logic_vector(31 downto 0);
 		
 		variable csr_set_bits, csr_clear_bits: std_logic_vector(31 downto 0);
 		variable v_temp: unsigned(63 downto 0);
@@ -61,6 +63,14 @@ begin
 			v_temp := unsigned(mcycleh & mcycle) + 1;
 			v_mcycle_next := std_logic_vector(v_temp(31 downto 0));
 			v_mcycleh_next := std_logic_vector(v_temp(63 downto 32));
+
+			v_temp := unsigned(minstreth & minstret);
+			if instr_retire = '1' then
+				v_temp := v_temp + 1;
+			end if;
+
+			v_minstret_next := std_logic_vector(v_temp(31 downto 0));
+			v_minstreth_next := std_logic_vector(v_temp(63 downto 32));
 
 			if input.is_active = '1' and input.is_invalid = '0' then
 				if input.operation = OP_ADD then
@@ -267,7 +277,7 @@ begin
 						v_mcycle_next := (mcycle or csr_set_bits) and csr_clear_bits;
 					elsif input.operand2(11 downto 0) = CSR_MINSTRET then
 						v_output.result := minstret;
-						minstret <= (minstret or csr_set_bits) and csr_clear_bits;
+						v_minstret_next := (minstret or csr_set_bits) and csr_clear_bits;
 					elsif unsigned(CSR_MHPMCOUNTER3) <= unsigned(input.operand2(11 downto 0)) and unsigned(input.operand2(11 downto 0)) <= unsigned(CSR_MHPMCOUNTER31) then
 						v_output.result := (others => '0');
 					elsif input.operand2(11 downto 0) = CSR_MCYCLEH then
@@ -275,7 +285,7 @@ begin
 						v_mcycleh_next := (mcycleh or csr_set_bits) and csr_clear_bits;
 					elsif input.operand2(11 downto 0) = CSR_MINSTRETH then
 						v_output.result := minstreth;
-						minstreth <= (minstreth or csr_set_bits) and csr_clear_bits;
+						v_minstreth_next := (minstreth or csr_set_bits) and csr_clear_bits;
 					elsif unsigned(CSR_MHPMCOUNTER3H) <= unsigned(input.operand2(11 downto 0)) and unsigned(input.operand2(11 downto 0)) <= unsigned(CSR_MHPMCOUNTER31H) then
 						v_output.result := (others => '0');
 					elsif unsigned(CSR_MHPMEVENT3) <= unsigned(input.operand2(11 downto 0)) and unsigned(input.operand2(11 downto 0)) <= unsigned(CSR_MHPMEVENT31) then
@@ -318,6 +328,9 @@ begin
 
 			mcycle <= v_mcycle_next;
 			mcycleh <= v_mcycleh_next;
+
+			minstret <= v_minstret_next;
+			minstreth <= v_minstreth_next;
 		end if;
 	end process;
 
