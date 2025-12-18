@@ -32,6 +32,7 @@ package core_types is
 		OP_CSRRW,
 		OP_CSRRS,
 		OP_CSRRC,
+		OP_MRET,
 		OP_LED
 	);
 

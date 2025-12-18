@@ -300,6 +300,9 @@ begin
 					-- ECALL
 				elsif i_imm = "000000000001" and rs1 = "00000" and funct3 = "000" and rd = "00000" and opcode = "1110011" then
 					-- EBREAK
+				elsif funct7 = "0011000" and rs2 = "00010" and rs1 = "00000" and rd = "00000" and opcode = "1110011" then
+					-- MRET
+					v_decode_output.operation := OP_MRET;
 				elsif opcode = "1110011" then
 					v_decode_output.operand2 := "00000000000000000000" & i_imm;  -- store CSR register in operand 2
 					v_decode_output.destination_reg := rd;

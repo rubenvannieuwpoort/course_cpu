@@ -310,6 +310,11 @@ begin
 					else
 						-- TODO: exception; trying to write to non-existent or read-only CSR
 					end if;
+				elsif input.operation = OP_MRET then
+					mstatus_mie <= mstatus_mpie;
+					mstatus_mpie <= '1';
+					v_jump := '1';
+					v_jump_address := mepc & "00";
 				elsif input.operation = OP_LED then
 					led <= input.operand1(7 downto 0);
 				else
