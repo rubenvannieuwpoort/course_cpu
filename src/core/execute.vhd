@@ -45,8 +45,10 @@ begin
 		variable v_jump: std_logic;
 		variable v_jump_address: std_logic_vector(31 downto 0);
 		variable v_mem_req: mem_req_t;
+		variable v_mcycle_next, v_mcycleh_next: std_logic_vector(31 downto 0);
 		
 		variable csr_set_bits, csr_clear_bits: std_logic_vector(31 downto 0);
+		variable v_temp: unsigned(63 downto 0);
 
 	begin
 		if rising_edge(clk) then
@@ -55,6 +57,10 @@ begin
 			v_mem_req := DEFAULT_MEM_REQ;
 			v_jump := '0';
 			v_jump_address := (others => '0');
+
+			v_temp := unsigned(mcycleh & mcycle) + 1;
+			v_mcycle_next := std_logic_vector(v_temp(31 downto 0));
+			v_mcycleh_next := std_logic_vector(v_temp(63 downto 32));
 
 			if input.is_active = '1' and input.is_invalid = '0' then
 				if input.operation = OP_ADD then
@@ -258,7 +264,7 @@ begin
 						mip <= (mip or csr_set_bits(15 downto 0)) and csr_clear_bits(15 downto 0);
 					elsif input.operand2(11 downto 0) = CSR_MCYCLE then
 						v_output.result := mcycle;
-						mcycle <= (mcycle or csr_set_bits) and csr_clear_bits;
+						v_mcycle_next := (mcycle or csr_set_bits) and csr_clear_bits;
 					elsif input.operand2(11 downto 0) = CSR_MINSTRET then
 						v_output.result := minstret;
 						minstret <= (minstret or csr_set_bits) and csr_clear_bits;
@@ -266,7 +272,7 @@ begin
 						v_output.result := (others => '0');
 					elsif input.operand2(11 downto 0) = CSR_MCYCLEH then
 						v_output.result := mcycleh;
-						mcycleh <= (mcycleh or csr_set_bits) and csr_clear_bits;
+						v_mcycleh_next := (mcycleh or csr_set_bits) and csr_clear_bits;
 					elsif input.operand2(11 downto 0) = CSR_MINSTRETH then
 						v_output.result := minstreth;
 						minstreth <= (minstreth or csr_set_bits) and csr_clear_bits;
@@ -309,6 +315,9 @@ begin
 
 			jump <= v_jump;
 			jump_address <= v_jump_address(31 downto 1) & "0";
+
+			mcycle <= v_mcycle_next;
+			mcycleh <= v_mcycleh_next;
 		end if;
 	end process;
 
