@@ -33,6 +33,8 @@ package core_types is
 		OP_CSRRS,
 		OP_CSRRC,
 		OP_MRET,
+		OP_ECALL,
+		OP_EBREAK,
 		OP_LED
 	);
 
@@ -45,12 +47,14 @@ package core_types is
 	type decode_output_t is record
 		is_active: std_logic;
 		is_invalid: std_logic;
+		is_invalid_address: std_logic;
 		operation: operation_t;
 		operand1: std_logic_vector(31 downto 0);
 		operand2: std_logic_vector(31 downto 0);
 		operand3: std_logic_vector(31 downto 0);
 		destination_reg: std_logic_vector(4 downto 0);
 		csr_read_only: std_logic;
+		pc: std_logic_vector(31 downto 0);
 	end record decode_output_t;
 
 	type read_size_t is (SIZE_WORD, SIZE_HALFWORD, SIZE_BYTE);

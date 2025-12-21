@@ -31,7 +31,7 @@ architecture rtl of execute is
 	signal mscratch: std_logic_vector(31 downto 0) := (others => '0');
 	signal mepc: std_logic_vector(29 downto 0) := (others => '0');
 	signal mcause_int: std_logic := '0';
-	signal mcause_code: std_logic_vector(5 downto 0) := (others => '0');
+	signal mcause_code: std_logic_vector(3 downto 0) := (others => '0');
 	signal mtval: std_logic_vector(31 downto 0) := (others => '0');
 	signal mip: std_logic_vector(15 downto 0) := (others => '0');
 	signal mcycle: std_logic_vector(31 downto 0) := (others => '0');
@@ -46,11 +46,21 @@ begin
 		variable v_jump: std_logic;
 		variable v_jump_address: std_logic_vector(31 downto 0);
 		variable v_mem_req: mem_req_t;
-		variable v_mcycle_next, v_mcycleh_next: std_logic_vector(31 downto 0);
-		variable v_minstret_next, v_minstreth_next: std_logic_vector(31 downto 0);
+		variable v_mcycle_inc, v_mcycleh_inc: std_logic_vector(31 downto 0);
+		variable v_mcycle, v_mcycleh: std_logic_vector(31 downto 0);
+		variable v_minstret_inc, v_minstreth_inc: std_logic_vector(31 downto 0);
+		variable v_minstret, v_minstreth: std_logic_vector(31 downto 0);
+		variable v_mepc: std_logic_vector(29 downto 0);
+		variable v_mcause_int: std_logic;
+		variable v_mcause_code: std_logic_vector(3 downto 0);
+
+		variable v_address, v_value: std_logic_vector(31 downto 0);
 		
 		variable csr_set_bits, csr_clear_bits: std_logic_vector(31 downto 0);
 		variable v_temp: unsigned(63 downto 0);
+
+		variable has_exception: boolean;
+		variable exception_cause: std_logic_vector(3 downto 0);
 
 	begin
 		if rising_edge(clk) then
@@ -61,281 +71,370 @@ begin
 			v_jump_address := (others => '0');
 
 			v_temp := unsigned(mcycleh & mcycle) + 1;
-			v_mcycle_next := std_logic_vector(v_temp(31 downto 0));
-			v_mcycleh_next := std_logic_vector(v_temp(63 downto 32));
+			v_mcycle_inc := std_logic_vector(v_temp(31 downto 0));
+			v_mcycle := v_mcycle_inc;
+			v_mcycleh_inc := std_logic_vector(v_temp(63 downto 32));
+			v_mcycleh := v_mcycleh_inc;
+			v_mepc := mepc;
+			v_mcause_int := mcause_int;
+			v_mcause_code := mcause_code;
+
+			has_exception := false;
+			exception_cause := (others => '0');
 
 			v_temp := unsigned(minstreth & minstret);
 			if instr_retire = '1' then
 				v_temp := v_temp + 1;
 			end if;
 
-			v_minstret_next := std_logic_vector(v_temp(31 downto 0));
-			v_minstreth_next := std_logic_vector(v_temp(63 downto 32));
+			v_minstret := std_logic_vector(v_temp(31 downto 0));
+			v_minstreth := std_logic_vector(v_temp(63 downto 32));
 
-			if input.is_active = '1' and input.is_invalid = '0' then
-				if input.operation = OP_ADD then
-					v_output.result := std_logic_vector(unsigned(input.operand1) + unsigned(input.operand2));
-				elsif input.operation = OP_SUB then
-					v_output.result := std_logic_vector(unsigned(input.operand1) - unsigned(input.operand2));
-				elsif input.operation = OP_SLT then
-					if signed(input.operand1) < signed(input.operand2) then
-						v_output.result := std_logic_vector(to_unsigned(1, 32));
-					else
-						v_output.result := (others => '0');
-					end if;
-				elsif input.operation = OP_SLTU then
-					if unsigned(input.operand1) < unsigned(input.operand2) then
-						v_output.result := std_logic_vector(to_unsigned(1, 32));
-					else
-						v_output.result := (others => '0');
-					end if;
-				elsif input.operation = OP_XOR then
-					v_output.result := input.operand1 xor input.operand2;
-				elsif input.operation = OP_OR then
-					v_output.result := input.operand1 or input.operand2;
-				elsif input.operation = OP_AND then
-					v_output.result := input.operand1 and input.operand2;
-				elsif input.operation = OP_SLL then
-					v_output.result := input.operand1;
-
-					if input.operand2(4) = '1' then
-						v_output.result := v_output.result(15 downto 0) & "0000000000000000";
-					end if;
-					if input.operand2(3) = '1' then
-						v_output.result := v_output.result(23 downto 0) & "00000000";
-					end if;
-					if input.operand2(2) = '1' then
-						v_output.result := v_output.result(27 downto 0) & "0000";
-					end if;
-					if input.operand2(1) = '1' then
-						v_output.result := v_output.result(29 downto 0) & "00";
-					end if;
-					if input.operand2(0) = '1' then
-						v_output.result := v_output.result(30 downto 0) & "0";
-					end if;
-				elsif input.operation = OP_SRL or input.operation = OP_SRA then
-					v_output.result := input.operand1;
-
-					if input.operation = OP_SRL then
-						v_sign := (others => '0');
-					else
-						v_sign := (others => input.operand1(31));
-					end if;
-
-					if input.operand2(4) = '1' then
-						v_output.result := v_sign(15 downto 0) & v_output.result(31 downto 16);
-					end if;
-					if input.operand2(3) = '1' then
-						v_output.result := v_sign(7 downto 0) & v_output.result(31 downto 8);
-					end if;
-					if input.operand2(2) = '1' then
-						v_output.result := v_sign(3 downto 0) & v_output.result(31 downto 4);
-					end if;
-					if input.operand2(1) = '1' then
-						v_output.result := v_sign(2 downto 0) & v_output.result(31 downto 3);
-					end if;
-					if input.operand2(0) = '1' then
-						v_output.result := v_sign(1 downto 0) & v_output.result(31 downto 2);
-					end if;
-				elsif input.operation = OP_JAL then
-					v_jump := '1';
-					v_jump_address := std_logic_vector(unsigned(input.operand1) + unsigned(input.operand2));
-					v_output.result := input.operand3;
-				elsif input.operation = OP_BEQ then
-					if input.operand1 = input.operand2 then
-						v_jump := '1';
-						v_jump_address := input.operand3;
-					end if;
-				elsif input.operation = OP_BNE then
-					if input.operand1 /= input.operand2 then
-						v_jump := '1';
-						v_jump_address := input.operand3;
-					end if;
-				elsif input.operation = OP_BLT then
-					if signed(input.operand1) < signed(input.operand2) then
-						v_jump := '1';
-						v_jump_address := input.operand3;
-					end if;
-				elsif input.operation = OP_BGE then
-					if signed(input.operand1) >= signed(input.operand2) then
-						v_jump := '1';
-						v_jump_address := input.operand3;
-					end if;
-				elsif input.operation = OP_BLTU then
-					if unsigned(input.operand1) < unsigned(input.operand2) then
-						v_jump := '1';
-						v_jump_address := input.operand3;
-					end if;
-				elsif input.operation = OP_BGEU then
-					if unsigned(input.operand1) >= unsigned(input.operand2) then
-						v_jump := '1';
-						v_jump_address := input.operand3;
-					end if;
-				elsif input.operation = OP_SB then
-					v_mem_req.active := '1';
-					v_mem_req.address := input.operand1;
-
-					if input.operand1(1 downto 0) = "00" then
-						v_mem_req.value := x"000000" & input.operand2(7 downto 0);
-						v_mem_req.write_enable := "0001";
-					elsif input.operand1(1 downto 0) = "01" then
-						v_mem_req.value := x"0000" & input.operand2(7 downto 0) & x"00";
-						v_mem_req.write_enable := "0010";
-					elsif input.operand1(1 downto 0) = "10" then
-						v_mem_req.value := x"00" & input.operand2(7 downto 0) & x"0000";
-						v_mem_req.write_enable := "0100";
-					else
-						v_mem_req.value := input.operand2(7 downto 0) & x"000000";
-						v_mem_req.write_enable := "1000";
-					end if;
-				elsif input.operation = OP_SH then
-					-- TODO: a misaligned store should generate an exception
-					v_mem_req.active := '1';
-					v_mem_req.address := input.operand1;
-
-					if input.operand1(1 downto 0) = "00" then
-						v_mem_req.value := x"0000" & input.operand2(15 downto 0);
-						v_mem_req.write_enable := "0011";
-					else
-						v_mem_req.value := input.operand2(15 downto 0) & x"0000";
-						v_mem_req.write_enable := "1100";
-					end if;
-				elsif input.operation = OP_SW then
-					-- TODO: a misaligned store should generate an exception
-					v_mem_req.active := '1';
-					v_mem_req.write_enable := "1111";
-					v_mem_req.address := input.operand1;
-					v_mem_req.value := input.operand2;
-				elsif input.operation = OP_LB or input.operation = OP_LH or input.operation = OP_LW or
-				      input.operation = OP_LBU or input.operation = OP_LHU then
-					-- TODO: a misaligned load should generate an exception
-					v_output.use_mem := '1';
-					v_output.mem_addr := input.operand1(1 downto 0);
-
-					v_mem_req.active := '1';
-					v_mem_req.address := input.operand1;
-
-					if input.operation = OP_LB or input.operation = OP_LH then
-						v_output.mem_sign_extend := '1';
-					end if;
-
-					if input.operation = OP_LB or input.operation = OP_LBU then
-						v_output.mem_size := SIZE_BYTE;
-					elsif input.operation = OP_LH or input.operation = OP_LHU then
-						v_output.mem_size := SIZE_HALFWORD;
-					else
-						v_output.mem_size := SIZE_WORD;
-					end if;
-				elsif input.operation = OP_CSRRW or input.operation = OP_CSRRS or input.operation = OP_CSRRC then
-					if input.operation = OP_CSRRW then
-						csr_set_bits := input.operand1;
-						csr_clear_bits := input.operand1;
-					elsif input.operation = OP_CSRRS then
-						csr_set_bits := input.operand1;
-						csr_clear_bits := (others => '1');
-					elsif input.operation = OP_CSRRC then
-						csr_clear_bits := not input.operand1;
-					else
-						assert false report "Unhandled CSR operation in execute stage" severity failure;
-					end if;
-
-					-- TODO: implementations for CSR read-write registers
-
-					if input.operand2(11 downto 0) = CSR_MSTATUS then
-						v_output.result := "000000000000000000011000" & mstatus_mpie & "000" & mstatus_mie & "000";
-						mstatus_mie <= (mstatus_mie or csr_set_bits(3)) and csr_clear_bits(3);
-						mstatus_mpie <= (mstatus_mpie or csr_set_bits(7)) and csr_clear_bits(7);
-					elsif input.operand2(11 downto 0) = CSR_MISA then
-						v_output.result := MISA_VALUE;
-					elsif input.operand2(11 downto 0) = CSR_MIE then
-						v_output.result := x"0000" & mie;
-						mie <= (mie or csr_set_bits(15 downto 0)) and csr_clear_bits(15 downto 0);
-					elsif input.operand2(11 downto 0) = CSR_MTVEC then
-						v_output.result := mtvec_address & "0" & mtvec_mode;
-						mtvec_address <= (mtvec_address or csr_set_bits(31 downto 2)) and csr_clear_bits(31 downto 2);
-						mtvec_mode <= (mtvec_mode or csr_set_bits(0)) and csr_clear_bits(0);
-					elsif input.operand2(11 downto 0) = CSR_MSTATUSH then
-						v_output.result := (others => '0');
-					elsif input.operand2(11 downto 0) = CSR_MSCRATCH then
-						v_output.result := mscratch;
-						mscratch <= (mscratch or csr_set_bits) and csr_clear_bits;
-					elsif input.operand2(11 downto 0) = CSR_MEPC then
-						v_output.result := mepc & "00";
-						mepc <= (mepc or csr_set_bits(31 downto 2)) and csr_clear_bits(31 downto 2);
-					elsif input.operand2(11 downto 0) = CSR_MCAUSE then
-						v_output.result := mcause_int & "0000000000000000000000000" & mcause_code;
-						mcause_int <= (mcause_int or csr_set_bits(31)) and csr_clear_bits(31);
-						mcause_code <= (mcause_code or csr_set_bits(5 downto 0)) and csr_clear_bits(5 downto 0);
-					elsif input.operand2(11 downto 0) = CSR_MTVAL then
-						v_output.result := mtval;
-						mtval <= (mtval or csr_set_bits) and csr_clear_bits;
-					elsif input.operand2(11 downto 0) = CSR_MIP then
-						v_output.result := x"0000" & mip;
-						mip <= (mip or csr_set_bits(15 downto 0)) and csr_clear_bits(15 downto 0);
-					elsif input.operand2(11 downto 0) = CSR_MCYCLE then
-						v_output.result := mcycle;
-						v_mcycle_next := (mcycle or csr_set_bits) and csr_clear_bits;
-					elsif input.operand2(11 downto 0) = CSR_MINSTRET then
-						v_output.result := minstret;
-						v_minstret_next := (minstret or csr_set_bits) and csr_clear_bits;
-					elsif unsigned(CSR_MHPMCOUNTER3) <= unsigned(input.operand2(11 downto 0)) and unsigned(input.operand2(11 downto 0)) <= unsigned(CSR_MHPMCOUNTER31) then
-						v_output.result := (others => '0');
-					elsif input.operand2(11 downto 0) = CSR_MCYCLEH then
-						v_output.result := mcycleh;
-						v_mcycleh_next := (mcycleh or csr_set_bits) and csr_clear_bits;
-					elsif input.operand2(11 downto 0) = CSR_MINSTRETH then
-						v_output.result := minstreth;
-						v_minstreth_next := (minstreth or csr_set_bits) and csr_clear_bits;
-					elsif unsigned(CSR_MHPMCOUNTER3H) <= unsigned(input.operand2(11 downto 0)) and unsigned(input.operand2(11 downto 0)) <= unsigned(CSR_MHPMCOUNTER31H) then
-						v_output.result := (others => '0');
-					elsif unsigned(CSR_MHPMEVENT3) <= unsigned(input.operand2(11 downto 0)) and unsigned(input.operand2(11 downto 0)) <= unsigned(CSR_MHPMEVENT31) then
-						v_output.result := (others => '0');
-					elsif unsigned(CSR_MHPMEVENT3H) <= unsigned(input.operand2(11 downto 0)) and unsigned(input.operand2(11 downto 0)) <= unsigned(CSR_MHPMEVENT31H) then
-						v_output.result := (others => '0');
-					elsif input.csr_read_only = '1' then
-						-- read-only CSRs
-						if input.operand2(11 downto 0) = CSR_MVENDORID then
-							v_output.result := MVENDORID_VALUE;
-						elsif input.operand2(11 downto 0) = CSR_MARCHID then
-							v_output.result := MARCHID_VALUE;
-						elsif input.operand2(11 downto 0) = CSR_MIMPID then
-							v_output.result := MIMPID_VALUE;
-						elsif input.operand2(11 downto 0) = CSR_MHARTID then
-							v_output.result := MHARTID_VALUE;
-						elsif input.operand2(11 downto 0) = CSR_MCONFIGPTR then
-							v_output.result := MCONFIGPTR_VALUE;
-						else
-							-- TODO: exception; trying to read non-existent CSR
-						end if;
-					else
-						-- TODO: exception; trying to write to non-existent or read-only CSR
-					end if;
-				elsif input.operation = OP_MRET then
-					mstatus_mie <= mstatus_mpie;
-					mstatus_mpie <= '1';
-					v_jump := '1';
-					v_jump_address := mepc & "00";
-				elsif input.operation = OP_LED then
-					led <= input.operand1(7 downto 0);
+			if input.is_active = '1' then
+				if input.is_invalid_address = '1' then
+					has_exception := true;
+					exception_cause := EX_CAUSE_INSTRUCTION_ACCESS_FAULT;
+				elsif input.is_invalid = '1' then
+					has_exception := true;
+					exception_cause := EX_CAUSE_ILLEGAL_INSTRUCTION;
 				else
-					assert false report "Unhandled operation value in execute stage" severity failure;
+					if input.operation = OP_ADD then
+						v_output.result := std_logic_vector(unsigned(input.operand1) + unsigned(input.operand2));
+					elsif input.operation = OP_SUB then
+						v_output.result := std_logic_vector(unsigned(input.operand1) - unsigned(input.operand2));
+					elsif input.operation = OP_SLT then
+						if signed(input.operand1) < signed(input.operand2) then
+							v_output.result := std_logic_vector(to_unsigned(1, 32));
+						else
+							v_output.result := (others => '0');
+						end if;
+					elsif input.operation = OP_SLTU then
+						if unsigned(input.operand1) < unsigned(input.operand2) then
+							v_output.result := std_logic_vector(to_unsigned(1, 32));
+						else
+							v_output.result := (others => '0');
+						end if;
+					elsif input.operation = OP_XOR then
+						v_output.result := input.operand1 xor input.operand2;
+					elsif input.operation = OP_OR then
+						v_output.result := input.operand1 or input.operand2;
+					elsif input.operation = OP_AND then
+						v_output.result := input.operand1 and input.operand2;
+					elsif input.operation = OP_SLL then
+						v_output.result := input.operand1;
+
+						if input.operand2(4) = '1' then
+							v_output.result := v_output.result(15 downto 0) & "0000000000000000";
+						end if;
+						if input.operand2(3) = '1' then
+							v_output.result := v_output.result(23 downto 0) & "00000000";
+						end if;
+						if input.operand2(2) = '1' then
+							v_output.result := v_output.result(27 downto 0) & "0000";
+						end if;
+						if input.operand2(1) = '1' then
+							v_output.result := v_output.result(29 downto 0) & "00";
+						end if;
+						if input.operand2(0) = '1' then
+							v_output.result := v_output.result(30 downto 0) & "0";
+						end if;
+					elsif input.operation = OP_SRL or input.operation = OP_SRA then
+						v_output.result := input.operand1;
+
+						if input.operation = OP_SRL then
+							v_sign := (others => '0');
+						else
+							v_sign := (others => input.operand1(31));
+						end if;
+
+						if input.operand2(4) = '1' then
+							v_output.result := v_sign(15 downto 0) & v_output.result(31 downto 16);
+						end if;
+						if input.operand2(3) = '1' then
+							v_output.result := v_sign(7 downto 0) & v_output.result(31 downto 8);
+						end if;
+						if input.operand2(2) = '1' then
+							v_output.result := v_sign(3 downto 0) & v_output.result(31 downto 4);
+						end if;
+						if input.operand2(1) = '1' then
+							v_output.result := v_sign(2 downto 0) & v_output.result(31 downto 3);
+						end if;
+						if input.operand2(0) = '1' then
+							v_output.result := v_sign(1 downto 0) & v_output.result(31 downto 2);
+						end if;
+					elsif input.operation = OP_JAL then
+						v_jump := '1';
+						v_jump_address := std_logic_vector(unsigned(input.operand1) + unsigned(input.operand2));
+						v_output.result := input.operand3;
+					elsif input.operation = OP_BEQ then
+						if input.operand1 = input.operand2 then
+							v_jump := '1';
+							v_jump_address := input.operand3;
+						end if;
+					elsif input.operation = OP_BNE then
+						if input.operand1 /= input.operand2 then
+							v_jump := '1';
+							v_jump_address := input.operand3;
+						end if;
+					elsif input.operation = OP_BLT then
+						if signed(input.operand1) < signed(input.operand2) then
+							v_jump := '1';
+							v_jump_address := input.operand3;
+						end if;
+					elsif input.operation = OP_BGE then
+						if signed(input.operand1) >= signed(input.operand2) then
+							v_jump := '1';
+							v_jump_address := input.operand3;
+						end if;
+					elsif input.operation = OP_BLTU then
+						if unsigned(input.operand1) < unsigned(input.operand2) then
+							v_jump := '1';
+							v_jump_address := input.operand3;
+						end if;
+					elsif input.operation = OP_BGEU then
+						if unsigned(input.operand1) >= unsigned(input.operand2) then
+							v_jump := '1';
+							v_jump_address := input.operand3;
+						end if;
+					elsif input.operation = OP_SB then
+						v_address := input.operand1;
+						v_value := input.operand2;
+
+						v_mem_req.active := '1';
+						v_mem_req.address := v_address;
+
+						if v_address(1 downto 0) = "00" then
+							v_mem_req.value := x"000000" & v_value(7 downto 0);
+							v_mem_req.write_enable := "0001";
+						elsif v_address(1 downto 0) = "01" then
+							v_mem_req.value := x"0000" & v_value(7 downto 0) & x"00";
+							v_mem_req.write_enable := "0010";
+						elsif v_address(1 downto 0) = "10" then
+							v_mem_req.value := x"00" & v_value(7 downto 0) & x"0000";
+							v_mem_req.write_enable := "0100";
+						else
+							v_mem_req.value := v_value(7 downto 0) & x"000000";
+							v_mem_req.write_enable := "1000";
+						end if;
+
+						if not (MEM_ADDRESS_MIN <= v_address and v_address <= MEM_ADDRESS_MAX) then
+							has_exception := true;
+							exception_cause := EX_CAUSE_STORE_ACCESS_FAULT;
+						end if;
+					elsif input.operation = OP_SH then
+						v_address := input.operand1;
+						v_value := input.operand2;
+
+						v_mem_req.active := '1';
+						v_mem_req.address := v_address;
+
+						if input.operand1(1 downto 0) = "00" then
+							v_mem_req.value := x"0000" & v_value(15 downto 0);
+							v_mem_req.write_enable := "0011";
+						else
+							v_mem_req.value := v_value(15 downto 0) & x"0000";
+							v_mem_req.write_enable := "1100";
+						end if;
+
+						if v_address(0) /= '0' then
+							has_exception := true;
+							exception_cause := EX_CAUSE_STORE_ADDRESS_MISALIGNED;
+						elsif not (MEM_ADDRESS_MIN <= v_address and v_address <= MEM_ADDRESS_MAX) then
+							has_exception := true;
+							exception_cause := EX_CAUSE_STORE_ACCESS_FAULT;
+						end if;
+					elsif input.operation = OP_SW then
+						v_mem_req.active := '1';
+						v_mem_req.write_enable := "1111";
+						v_mem_req.address := input.operand1;
+						v_mem_req.value := input.operand2;
+
+						if v_address(1 downto 0) /= "00" then
+							has_exception := true;
+							exception_cause := EX_CAUSE_STORE_ADDRESS_MISALIGNED;
+						elsif not (MEM_ADDRESS_MIN <= v_address and v_address <= MEM_ADDRESS_MAX) then
+							has_exception := true;
+							exception_cause := EX_CAUSE_STORE_ACCESS_FAULT;
+						end if;
+					elsif input.operation = OP_LB or input.operation = OP_LH or input.operation = OP_LW or input.operation = OP_LBU or input.operation = OP_LHU then
+						v_address := input.operand1;
+
+						v_output.use_mem := '1';
+						v_output.mem_addr := v_address(1 downto 0);
+
+						v_mem_req.active := '1';
+						v_mem_req.address := v_address;
+
+						if input.operation = OP_LB or input.operation = OP_LH then
+							v_output.mem_sign_extend := '1';
+						end if;
+
+						if input.operation = OP_LB or input.operation = OP_LBU then
+							v_output.mem_size := SIZE_BYTE;
+							if not (MEM_ADDRESS_MIN <= v_address and v_address <= MEM_ADDRESS_MAX) then
+								has_exception := true;
+								exception_cause := EX_CAUSE_LOAD_ACCESS_FAULT;
+							end if;
+						elsif input.operation = OP_LH or input.operation = OP_LHU then
+							v_output.mem_size := SIZE_HALFWORD;
+							if v_address(0) /= '0' then
+								has_exception := true;
+								exception_cause := EX_CAUSE_LOAD_ADDRESS_MISALIGNED;
+							elsif not (MEM_ADDRESS_MIN <= v_address and v_address <= MEM_ADDRESS_MAX) then
+								has_exception := true;
+								exception_cause := EX_CAUSE_LOAD_ACCESS_FAULT;
+							end if;
+						else
+							v_output.mem_size := SIZE_WORD;
+							if v_address(1 downto 0) /= "00" then
+								has_exception := true;
+								exception_cause := EX_CAUSE_LOAD_ADDRESS_MISALIGNED;
+							elsif not (MEM_ADDRESS_MIN <= v_address and v_address <= MEM_ADDRESS_MAX) then
+								has_exception := true;
+								exception_cause := EX_CAUSE_LOAD_ACCESS_FAULT;
+							end if;
+						end if;
+					elsif input.operation = OP_CSRRW or input.operation = OP_CSRRS or input.operation = OP_CSRRC then
+						if input.operation = OP_CSRRW then
+							csr_set_bits := input.operand1;
+							csr_clear_bits := input.operand1;
+						elsif input.operation = OP_CSRRS then
+							csr_set_bits := input.operand1;
+							csr_clear_bits := (others => '1');
+						elsif input.operation = OP_CSRRC then
+							csr_clear_bits := not input.operand1;
+						else
+							assert false report "Unhandled CSR operation in execute stage" severity failure;
+						end if;
+
+						-- TODO: implementations for CSR read-write registers
+
+						if input.operand2(11 downto 0) = CSR_MSTATUS then
+							v_output.result := "000000000000000000011000" & mstatus_mpie & "000" & mstatus_mie & "000";
+							mstatus_mie <= (mstatus_mie or csr_set_bits(3)) and csr_clear_bits(3);
+							mstatus_mpie <= (mstatus_mpie or csr_set_bits(7)) and csr_clear_bits(7);
+						elsif input.operand2(11 downto 0) = CSR_MISA then
+							v_output.result := MISA_VALUE;
+						elsif input.operand2(11 downto 0) = CSR_MIE then
+							v_output.result := x"0000" & mie;
+							mie <= (mie or csr_set_bits(15 downto 0)) and csr_clear_bits(15 downto 0);
+						elsif input.operand2(11 downto 0) = CSR_MTVEC then
+							v_output.result := mtvec_address & "0" & mtvec_mode;
+							mtvec_address <= (mtvec_address or csr_set_bits(31 downto 2)) and csr_clear_bits(31 downto 2);
+							mtvec_mode <= (mtvec_mode or csr_set_bits(0)) and csr_clear_bits(0);
+						elsif input.operand2(11 downto 0) = CSR_MSTATUSH then
+							v_output.result := (others => '0');
+						elsif input.operand2(11 downto 0) = CSR_MSCRATCH then
+							v_output.result := mscratch;
+							mscratch <= (mscratch or csr_set_bits) and csr_clear_bits;
+						elsif input.operand2(11 downto 0) = CSR_MEPC then
+							v_output.result := mepc & "00";
+							v_mepc := (mepc or csr_set_bits(31 downto 2)) and csr_clear_bits(31 downto 2);
+						elsif input.operand2(11 downto 0) = CSR_MCAUSE then
+							v_output.result := mcause_int & "000000000000000000000000000" & mcause_code;
+							mcause_int <= (mcause_int or csr_set_bits(31)) and csr_clear_bits(31);
+							mcause_code <= (mcause_code or csr_set_bits(5 downto 0)) and csr_clear_bits(5 downto 0);
+						elsif input.operand2(11 downto 0) = CSR_MTVAL then
+							v_output.result := mtval;
+							mtval <= (mtval or csr_set_bits) and csr_clear_bits;
+						elsif input.operand2(11 downto 0) = CSR_MIP then
+							v_output.result := x"0000" & mip;
+							mip <= (mip or csr_set_bits(15 downto 0)) and csr_clear_bits(15 downto 0);
+						elsif input.operand2(11 downto 0) = CSR_MCYCLE then
+							v_output.result := mcycle;
+							v_mcycle := (mcycle or csr_set_bits) and csr_clear_bits;
+						elsif input.operand2(11 downto 0) = CSR_MINSTRET then
+							v_output.result := minstret;
+							v_minstret := (minstret or csr_set_bits) and csr_clear_bits;
+						elsif unsigned(CSR_MHPMCOUNTER3) <= unsigned(input.operand2(11 downto 0)) and unsigned(input.operand2(11 downto 0)) <= unsigned(CSR_MHPMCOUNTER31) then
+							v_output.result := (others => '0');
+						elsif input.operand2(11 downto 0) = CSR_MCYCLEH then
+							v_output.result := mcycleh;
+							v_mcycleh := (mcycleh or csr_set_bits) and csr_clear_bits;
+						elsif input.operand2(11 downto 0) = CSR_MINSTRETH then
+							v_output.result := minstreth;
+							v_minstreth := (minstreth or csr_set_bits) and csr_clear_bits;
+						elsif unsigned(CSR_MHPMCOUNTER3H) <= unsigned(input.operand2(11 downto 0)) and unsigned(input.operand2(11 downto 0)) <= unsigned(CSR_MHPMCOUNTER31H) then
+							v_output.result := (others => '0');
+						elsif unsigned(CSR_MHPMEVENT3) <= unsigned(input.operand2(11 downto 0)) and unsigned(input.operand2(11 downto 0)) <= unsigned(CSR_MHPMEVENT31) then
+							v_output.result := (others => '0');
+						elsif unsigned(CSR_MHPMEVENT3H) <= unsigned(input.operand2(11 downto 0)) and unsigned(input.operand2(11 downto 0)) <= unsigned(CSR_MHPMEVENT31H) then
+							v_output.result := (others => '0');
+						elsif input.csr_read_only = '1' then
+							-- read-only CSRs
+							if input.operand2(11 downto 0) = CSR_MVENDORID then
+								v_output.result := MVENDORID_VALUE;
+							elsif input.operand2(11 downto 0) = CSR_MARCHID then
+								v_output.result := MARCHID_VALUE;
+							elsif input.operand2(11 downto 0) = CSR_MIMPID then
+								v_output.result := MIMPID_VALUE;
+							elsif input.operand2(11 downto 0) = CSR_MHARTID then
+								v_output.result := MHARTID_VALUE;
+							elsif input.operand2(11 downto 0) = CSR_MCONFIGPTR then
+								v_output.result := MCONFIGPTR_VALUE;
+							else
+								-- trying to read non-existent CSR
+								has_exception := true;
+								exception_cause := EX_CAUSE_ILLEGAL_INSTRUCTION;
+							end if;
+						else
+							-- trying to write to non-existent or read-only CSR
+							has_exception := true;
+							exception_cause := EX_CAUSE_ILLEGAL_INSTRUCTION;
+						end if;
+					elsif input.operation = OP_MRET then
+						mstatus_mie <= mstatus_mpie;
+						mstatus_mpie <= '1';
+						v_jump := '1';
+						v_jump_address := mepc & "00";
+						-- TODO: reset mepc?
+					elsif input.operation = OP_ECALL then
+						has_exception := true;
+						exception_cause := EX_CAUSE_ENVIRONMENT_CALL;
+					elsif input.operation = OP_EBREAK then
+						has_exception := true;
+						exception_cause := EX_CAUSE_BREAKPOINT;
+					elsif input.operation = OP_LED then
+						led <= input.operand1(7 downto 0);
+					else
+						assert false report "Unhandled operation value in execute stage" severity failure;
+					end if;
+
+					v_output.destination_reg := input.destination_reg;
 				end if;
 
-				v_output.destination_reg := input.destination_reg;
+				if v_jump = '1' and v_jump_address(1) /= '0' then
+					has_exception := true;
+					exception_cause := EX_CAUSE_INSTRUCTION_ADDRESS_MISALIGNED;
+				end if;
+
+				if has_exception then
+					v_output := DEFAULT_EXECUTE_OUTPUT;
+					v_output.is_active := '1';  -- needed to trigger the next instruction
+					v_mem_req := DEFAULT_MEM_REQ;
+					v_jump := '1';
+					v_jump_address := mtvec_address & "00";
+					v_mcycle := v_mcycle_inc;
+					v_mcycleh := v_mcycleh_inc;
+					v_minstret := v_minstret_inc;
+					v_minstreth := v_minstreth_inc;
+					v_mepc := input.pc(31 downto 2);
+					v_mcause_int := '0';
+					v_mcause_code := exception_cause;
+				end if;
 			end if;
 
 			output <= v_output;
-
 			mem_req <= v_mem_req;
-
 			jump <= v_jump;
 			jump_address <= v_jump_address(31 downto 1) & "0";
-
-			mcycle <= v_mcycle_next;
-			mcycleh <= v_mcycleh_next;
-
-			minstret <= v_minstret_next;
-			minstreth <= v_minstreth_next;
+			mcycle <= v_mcycle;
+			mcycleh <= v_mcycleh;
+			minstret <= v_minstret;
+			minstreth <= v_minstreth;
+			mepc <= v_mepc;
+			mcause_int <= v_mcause_int;
+			mcause_code <= v_mcause_code;
 		end if;
 	end process;
 

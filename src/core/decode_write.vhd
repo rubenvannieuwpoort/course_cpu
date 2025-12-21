@@ -2,6 +2,9 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
+use work.types.all;
+use work.constants.all;
+
 use work.core_types.all;
 use work.core_constants.all;
 
@@ -116,9 +119,11 @@ begin
 
 			if decode_input.is_active = '1' then
 				v_decode_output.is_active := '1';
-				v_decode_output.is_invalid := '0';
+				v_decode_output.pc := decode_input.pc;
 
-				if opcode = "0110111" then
+				if not (MEM_ADDRESS_MIN <= decode_input.pc and decode_input.pc <= MEM_ADDRESS_MAX) then
+					v_decode_output.is_invalid_address := '1';
+				elsif opcode = "0110111" then
 					-- LUI
 					v_decode_output.operation := OP_ADD;
 					v_decode_output.operand1 := (others => '0');
@@ -298,8 +303,10 @@ begin
 					-- FENCE (implemented as NOP)
 				elsif i_imm = "000000000000" and rs1 = "00000" and funct3 = "000" and rd = "00000" and opcode = "1110011" then
 					-- ECALL
+					v_decode_output.operation := OP_ECALL;
 				elsif i_imm = "000000000001" and rs1 = "00000" and funct3 = "000" and rd = "00000" and opcode = "1110011" then
 					-- EBREAK
+					v_decode_output.operation := OP_EBREAK;
 				elsif funct7 = "0011000" and rs2 = "00010" and rs1 = "00000" and rd = "00000" and opcode = "1110011" then
 					-- MRET
 					v_decode_output.operation := OP_MRET;

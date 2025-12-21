@@ -14,12 +14,14 @@ package core_constants is
 	constant DEFAULT_DECODE_OUTPUT: decode_output_t := (
 		is_active => '0',
 		is_invalid => '0',
+		is_invalid_address => '0',
 		operation => OP_ADD,
 		operand1 => (others => '0'),
 		operand2 => (others => '0'),
 		operand3 => (others => '0'),
 		destination_reg => (others => '0'),
-		csr_read_only => '0'
+		csr_read_only => '0',
+		pc => (others => '0')
 	);
 
 	constant DEFAULT_EXECUTE_OUTPUT: execute_output_t := (
@@ -77,4 +79,14 @@ package core_constants is
 	constant MCONFIGPTR_VALUE: std_logic_vector(31 downto 0) := X"00000000";
 
 	constant MISA_VALUE: std_logic_vector(31 downto 0) := X"40000100";  -- 32-bit RVI
+
+	constant EX_CAUSE_INSTRUCTION_ADDRESS_MISALIGNED: std_logic_vector(3 downto 0) := "0000";
+	constant EX_CAUSE_INSTRUCTION_ACCESS_FAULT: std_logic_vector(3 downto 0) := "0001";
+	constant EX_CAUSE_ILLEGAL_INSTRUCTION: std_logic_vector(3 downto 0) := "0010";
+	constant EX_CAUSE_BREAKPOINT: std_logic_vector(3 downto 0) := "0011";
+	constant EX_CAUSE_LOAD_ADDRESS_MISALIGNED: std_logic_vector(3 downto 0) := "0100";
+	constant EX_CAUSE_LOAD_ACCESS_FAULT: std_logic_vector(3 downto 0) := "0101";
+	constant EX_CAUSE_STORE_ADDRESS_MISALIGNED: std_logic_vector(3 downto 0) := "0110";
+	constant EX_CAUSE_STORE_ACCESS_FAULT: std_logic_vector(3 downto 0) := "0111";
+	constant EX_CAUSE_ENVIRONMENT_CALL: std_logic_vector(3 downto 0) := "1011";
 end package core_constants;
