@@ -1,0 +1,16 @@
+#!/bin/env bash
+
+# exit if any command fails
+set -e
+
+# make a temporary directory
+tmp=$(mktemp -d)
+
+# assemble
+riscv-elf-as "$1" -o "$tmp/output.o"
+
+# link
+riscv-elf-ld "$tmp/output.o" -T resources/linker.ld -o resources/output.elf
+
+# extract binary
+riscv-elf-objcopy -O binary resources/output.elf resources/output.bin

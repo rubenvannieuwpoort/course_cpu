@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+# compile and link
+riscv-elf-gcc -march=rv32i -mabi=ilp32 -nostdlib -ffreestanding -O3 resources/start.s "$1" -T resources/linker.ld -o resources/output.elf
+
+# extract binary
+riscv-elf-objcopy -O binary resources/output.elf resources/output.bin

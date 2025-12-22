@@ -1,0 +1,50 @@
+#!/bin/env python3
+
+BINARY_FILE_PATH = 'resources/output.bin'
+WORDS_PER_LINE = 8
+LOGSIZE2 = 14
+
+SOURCE_FILE_PATH = '../src/bram.vhd'
+START_MARKER = '-- START PROGMEM'
+END_MARKER = '-- END PROGMEM'
+
+
+MEMORY_SIZE = 1 << LOGSIZE2
+WORDS_LEN = 1 << (LOGSIZE2 - 2)
+
+
+# load binary to buffer
+
+buffer = [0] * WORDS_LEN
+with open(BINARY_FILE_PATH, 'rb') as f:
+	i = 0
+	j = 0
+	while True:
+		word = f.read(4)
+
+		if not word:
+			break
+
+		if len(word) < 4:
+			raise ValueError(f"Incomplete 32-bit word at offset {i}")
+
+		buffer[j] = int.from_bytes(word)
+		i += 4
+		j += 1
+
+i = 0
+lines = ['\ttype ram_type is array (0 to 4095) of std_logic_vector(31 downto 0);', '\tshared variable RAM: ram_type := (']
+while i < WORDS_LEN:
+	lines.append('\t\t' + ', '.join(map(lambda x: f'X"{x:08x}"', buffer[i:i+WORDS_PER_LINE]))
+	   + (',' if (i + WORDS_PER_LINE) < WORDS_LEN else ''))
+	i += WORDS_PER_LINE
+lines.append('\t);')
+
+
+# put the binary in the source file
+
+text = [line.rstrip("\n") for line in open(SOURCE_FILE_PATH)]
+start_idx, end_idx = text.index(START_MARKER), text.index(END_MARKER)
+assert 0 < start_idx and start_idx < end_idx
+
+open(SOURCE_FILE_PATH, 'w').write('\n'.join(text[0 : start_idx + 1] + lines + text[end_idx :]))

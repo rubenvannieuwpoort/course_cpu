@@ -8,3 +8,6 @@ cpu.ip_user_files/
 cpu.sim/
 cpu.runs/
 cpu.srcs/
+toolchain/resources/output.elf
+toolchain/resources/output.bin
+
