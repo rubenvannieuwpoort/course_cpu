@@ -38,6 +38,8 @@ architecture rtl of execute is
 	signal minstret: std_logic_vector(31 downto 0) := (others => '0');
 	signal mcycleh: std_logic_vector(31 downto 0) := (others => '0');
 	signal minstreth: std_logic_vector(31 downto 0) := (others => '0');
+	signal mtime: std_logic_vector(31 downto 0) := (others => '0');
+	signal mtimeh: std_logic_vector(31 downto 0) := (others => '0');
 begin
 
 	process (clk)
@@ -53,6 +55,8 @@ begin
 		variable v_mepc: std_logic_vector(29 downto 0);
 		variable v_mcause_int: std_logic;
 		variable v_mcause_code: std_logic_vector(3 downto 0);
+		variable v_mtime_inc, v_mtimeh_inc: std_logic_vector(31 downto 0);
+		variable v_mtime, v_mtimeh: std_logic_vector(31 downto 0);
 
 		variable v_address, v_value: std_logic_vector(31 downto 0);
 		
@@ -75,9 +79,16 @@ begin
 			v_mcycle := v_mcycle_inc;
 			v_mcycleh_inc := std_logic_vector(v_temp(63 downto 32));
 			v_mcycleh := v_mcycleh_inc;
+
 			v_mepc := mepc;
 			v_mcause_int := mcause_int;
 			v_mcause_code := mcause_code;
+
+			v_temp := unsigned(mtimeh & mtime) + 1;
+			v_mtime_inc := std_logic_vector(v_temp(31 downto 0));
+			v_mtime := v_mtime_inc;
+			v_mtimeh_inc := std_logic_vector(v_temp(63 downto 32));
+			v_mtimeh := v_mtimeh_inc;
 
 			has_exception := false;
 			exception_cause := (others => '0');
@@ -244,54 +255,66 @@ begin
 							exception_cause := EX_CAUSE_STORE_ACCESS_FAULT;
 						end if;
 					elsif input.operation = OP_SW then
-						v_mem_req.active := '1';
-						v_mem_req.write_enable := "1111";
 						v_mem_req.address := input.operand1;
-						v_mem_req.value := input.operand2;
 
-						if v_address(1 downto 0) /= "00" then
-							has_exception := true;
-							exception_cause := EX_CAUSE_STORE_ADDRESS_MISALIGNED;
-						elsif not (MEM_ADDRESS_MIN <= v_address and v_address <= MEM_ADDRESS_MAX) then
-							has_exception := true;
-							exception_cause := EX_CAUSE_STORE_ACCESS_FAULT;
+						if v_address = MTIME_ADDRESS then
+							v_mtime := input.operand2;
+						elsif v_address = MTIMEH_ADDRESS then
+							v_mtimeh := input.operand2;
+						else
+							v_mem_req.active := '1';
+							v_mem_req.write_enable := "1111";
+							v_mem_req.value := input.operand2;
+
+							if v_address(1 downto 0) /= "00" then
+								has_exception := true;
+								exception_cause := EX_CAUSE_STORE_ADDRESS_MISALIGNED;
+							elsif not (MEM_ADDRESS_MIN <= v_address and v_address <= MEM_ADDRESS_MAX) then
+								has_exception := true;
+								exception_cause := EX_CAUSE_STORE_ACCESS_FAULT;
+							end if;
 						end if;
 					elsif input.operation = OP_LB or input.operation = OP_LH or input.operation = OP_LW or input.operation = OP_LBU or input.operation = OP_LHU then
 						v_address := input.operand1;
 
-						v_output.use_mem := '1';
-						v_output.mem_addr := v_address(1 downto 0);
-
-						v_mem_req.active := '1';
-						v_mem_req.address := v_address;
-
-						if input.operation = OP_LB or input.operation = OP_LH then
-							v_output.mem_sign_extend := '1';
-						end if;
-
-						if input.operation = OP_LB or input.operation = OP_LBU then
-							v_output.mem_size := SIZE_BYTE;
-							if not (MEM_ADDRESS_MIN <= v_address and v_address <= MEM_ADDRESS_MAX) then
-								has_exception := true;
-								exception_cause := EX_CAUSE_LOAD_ACCESS_FAULT;
-							end if;
-						elsif input.operation = OP_LH or input.operation = OP_LHU then
-							v_output.mem_size := SIZE_HALFWORD;
-							if v_address(0) /= '0' then
-								has_exception := true;
-								exception_cause := EX_CAUSE_LOAD_ADDRESS_MISALIGNED;
-							elsif not (MEM_ADDRESS_MIN <= v_address and v_address <= MEM_ADDRESS_MAX) then
-								has_exception := true;
-								exception_cause := EX_CAUSE_LOAD_ACCESS_FAULT;
-							end if;
+						if input.operation = OP_LW and v_address = MTIME_ADDRESS then
+							v_output.result := mtime;
+						elsif input.operation = OP_LW and v_address = MTIMEH_ADDRESS then
+							v_output.result := mtimeh;
 						else
-							v_output.mem_size := SIZE_WORD;
-							if v_address(1 downto 0) /= "00" then
-								has_exception := true;
-								exception_cause := EX_CAUSE_LOAD_ADDRESS_MISALIGNED;
-							elsif not (MEM_ADDRESS_MIN <= v_address and v_address <= MEM_ADDRESS_MAX) then
-								has_exception := true;
-								exception_cause := EX_CAUSE_LOAD_ACCESS_FAULT;
+							v_output.use_mem := '1';
+							v_output.mem_addr := v_address(1 downto 0);
+							v_mem_req.active := '1';
+							v_mem_req.address := v_address;
+
+							if input.operation = OP_LB or input.operation = OP_LH then
+								v_output.mem_sign_extend := '1';
+							end if;
+
+							if input.operation = OP_LB or input.operation = OP_LBU then
+								v_output.mem_size := SIZE_BYTE;
+								if not (MEM_ADDRESS_MIN <= v_address and v_address <= MEM_ADDRESS_MAX) then
+									has_exception := true;
+									exception_cause := EX_CAUSE_LOAD_ACCESS_FAULT;
+								end if;
+							elsif input.operation = OP_LH or input.operation = OP_LHU then
+								v_output.mem_size := SIZE_HALFWORD;
+								if v_address(0) /= '0' then
+									has_exception := true;
+									exception_cause := EX_CAUSE_LOAD_ADDRESS_MISALIGNED;
+								elsif not (MEM_ADDRESS_MIN <= v_address and v_address <= MEM_ADDRESS_MAX) then
+									has_exception := true;
+									exception_cause := EX_CAUSE_LOAD_ACCESS_FAULT;
+								end if;
+							else
+								v_output.mem_size := SIZE_WORD;
+								if v_address(1 downto 0) /= "00" then
+									has_exception := true;
+									exception_cause := EX_CAUSE_LOAD_ADDRESS_MISALIGNED;
+								elsif not (MEM_ADDRESS_MIN <= v_address and v_address <= MEM_ADDRESS_MAX) then
+									has_exception := true;
+									exception_cause := EX_CAUSE_LOAD_ACCESS_FAULT;
+								end if;
 							end if;
 						end if;
 					elsif input.operation = OP_CSRRW or input.operation = OP_CSRRS or input.operation = OP_CSRRC then
@@ -416,6 +439,8 @@ begin
 					v_jump_address := mtvec_address & "00";
 					v_mcycle := v_mcycle_inc;
 					v_mcycleh := v_mcycleh_inc;
+					v_mtime := v_mtime_inc;
+					v_mtimeh := v_mtimeh_inc;
 					v_minstret := v_minstret_inc;
 					v_minstreth := v_minstreth_inc;
 					v_mepc := input.pc(31 downto 2);
@@ -430,6 +455,8 @@ begin
 			jump_address <= v_jump_address(31 downto 1) & "0";
 			mcycle <= v_mcycle;
 			mcycleh <= v_mcycleh;
+			mtime <= v_mtime;
+			mtimeh <= v_mtimeh;
 			minstret <= v_minstret;
 			minstreth <= v_minstreth;
 			mepc <= v_mepc;
