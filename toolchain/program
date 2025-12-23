@@ -28,7 +28,7 @@ with open(BINARY_FILE_PATH, 'rb') as f:
 		if len(word) < 4:
 			raise ValueError(f"Incomplete 32-bit word at offset {i}")
 
-		buffer[j] = int.from_bytes(word)
+		buffer[j] = int.from_bytes(word, byteorder='little')
 		i += 4
 		j += 1
 
