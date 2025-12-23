@@ -82,6 +82,8 @@ package core_constants is
 
 	constant MTIME_ADDRESS: std_logic_vector(31 downto 0) := X"0200BFF8";
 	constant MTIMEH_ADDRESS: std_logic_vector(31 downto 0) := X"0200BFFC";
+	constant MTIMECMP_ADDRESS: std_logic_vector(31 downto 0) := X"02004000";
+	constant MTIMECMPH_ADDRESS: std_logic_vector(31 downto 0) := X"02004004";
 
 	constant EX_CAUSE_INSTRUCTION_ADDRESS_MISALIGNED: std_logic_vector(3 downto 0) := "0000";
 	constant EX_CAUSE_INSTRUCTION_ACCESS_FAULT: std_logic_vector(3 downto 0) := "0001";

@@ -40,6 +40,8 @@ architecture rtl of execute is
 	signal minstreth: std_logic_vector(31 downto 0) := (others => '0');
 	signal mtime: std_logic_vector(31 downto 0) := (others => '0');
 	signal mtimeh: std_logic_vector(31 downto 0) := (others => '0');
+	signal mtimecmp: std_logic_vector(31 downto 0) := (others => '0');
+	signal mtimecmph: std_logic_vector(31 downto 0) := (others => '0');
 begin
 
 	process (clk)
@@ -57,6 +59,7 @@ begin
 		variable v_mcause_code: std_logic_vector(3 downto 0);
 		variable v_mtime_inc, v_mtimeh_inc: std_logic_vector(31 downto 0);
 		variable v_mtime, v_mtimeh: std_logic_vector(31 downto 0);
+		variable v_mtimecmp, v_mtimecmph: std_logic_vector(31 downto 0);
 
 		variable v_address, v_value: std_logic_vector(31 downto 0);
 		
@@ -89,6 +92,8 @@ begin
 			v_mtime := v_mtime_inc;
 			v_mtimeh_inc := std_logic_vector(v_temp(63 downto 32));
 			v_mtimeh := v_mtimeh_inc;
+			v_mtimecmp := mtimecmp;
+			v_mtimecmph := mtimecmph;
 
 			has_exception := false;
 			exception_cause := (others => '0');
@@ -261,6 +266,10 @@ begin
 							v_mtime := input.operand2;
 						elsif v_address = MTIMEH_ADDRESS then
 							v_mtimeh := input.operand2;
+						elsif v_address = MTIMECMP_ADDRESS then
+							v_mtimecmp := input.operand2;
+						elsif v_address = MTIMECMPH_ADDRESS then
+							v_mtimecmph := input.operand2;
 						else
 							v_mem_req.active := '1';
 							v_mem_req.write_enable := "1111";
@@ -281,6 +290,10 @@ begin
 							v_output.result := mtime;
 						elsif input.operation = OP_LW and v_address = MTIMEH_ADDRESS then
 							v_output.result := mtimeh;
+						elsif input.operation = OP_LW and v_address = MTIMECMP_ADDRESS then
+							v_output.result := mtimecmp;
+						elsif input.operation = OP_LW and v_address = MTIMECMPH_ADDRESS then
+							v_output.result := mtimecmph;
 						else
 							v_output.use_mem := '1';
 							v_output.mem_addr := v_address(1 downto 0);
@@ -441,6 +454,8 @@ begin
 					v_mcycleh := v_mcycleh_inc;
 					v_mtime := v_mtime_inc;
 					v_mtimeh := v_mtimeh_inc;
+					v_mtimecmp := mtimecmp;
+					v_mtimecmph := mtimecmph;
 					v_minstret := v_minstret_inc;
 					v_minstreth := v_minstreth_inc;
 					v_mepc := input.pc(31 downto 2);
@@ -457,6 +472,8 @@ begin
 			mcycleh <= v_mcycleh;
 			mtime <= v_mtime;
 			mtimeh <= v_mtimeh;
+			mtimecmp <= v_mtimecmp;
+			mtimecmph <= v_mtimecmph;
 			minstret <= v_minstret;
 			minstreth <= v_minstreth;
 			mepc <= v_mepc;
