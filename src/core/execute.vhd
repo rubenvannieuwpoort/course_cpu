@@ -25,7 +25,7 @@ end execute;
 
 architecture rtl of execute is
 	signal mstatus_mpie, mstatus_mie: std_logic := '0';
-	signal mie: std_logic_vector(15 downto 0) := (others => '0');
+	signal mtie: std_logic := '0';
 	signal mtvec_address: std_logic_vector(29 downto 0) := (others => '0');
 	signal mtvec_mode: std_logic := '0';
 	signal mscratch: std_logic_vector(31 downto 0) := (others => '0');
@@ -33,7 +33,6 @@ architecture rtl of execute is
 	signal mcause_int: std_logic := '0';
 	signal mcause_code: std_logic_vector(3 downto 0) := (others => '0');
 	signal mtval: std_logic_vector(31 downto 0) := (others => '0');
-	signal mip: std_logic_vector(15 downto 0) := (others => '0');
 	signal mcycle: std_logic_vector(31 downto 0) := (others => '0');
 	signal minstret: std_logic_vector(31 downto 0) := (others => '0');
 	signal mcycleh: std_logic_vector(31 downto 0) := (others => '0');
@@ -50,6 +49,7 @@ begin
 		variable v_jump: std_logic;
 		variable v_jump_address: std_logic_vector(31 downto 0);
 		variable v_mem_req: mem_req_t;
+		variable v_mstatus_mpie, v_mstatus_mie: std_logic;
 		variable v_mcycle_inc, v_mcycleh_inc: std_logic_vector(31 downto 0);
 		variable v_mcycle, v_mcycleh: std_logic_vector(31 downto 0);
 		variable v_minstret_inc, v_minstreth_inc: std_logic_vector(31 downto 0);
@@ -60,6 +60,12 @@ begin
 		variable v_mtime_inc, v_mtimeh_inc: std_logic_vector(31 downto 0);
 		variable v_mtime, v_mtimeh: std_logic_vector(31 downto 0);
 		variable v_mtimecmp, v_mtimecmph: std_logic_vector(31 downto 0);
+		variable v_mtip: std_logic;
+		variable v_mtval: std_logic_vector(31 downto 0);
+		variable v_mtie: std_logic;
+		variable v_mtvec_address: std_logic_vector(29 downto 0);
+		variable v_mtvec_mode: std_logic;
+		variable v_mscratch: std_logic_vector(31 downto 0);
 
 		variable v_address, v_value: std_logic_vector(31 downto 0);
 		
@@ -67,7 +73,6 @@ begin
 		variable v_temp: unsigned(63 downto 0);
 
 		variable has_exception: boolean;
-		variable exception_cause: std_logic_vector(3 downto 0);
 
 	begin
 		if rising_edge(clk) then
@@ -76,6 +81,9 @@ begin
 			v_mem_req := DEFAULT_MEM_REQ;
 			v_jump := '0';
 			v_jump_address := (others => '0');
+
+			v_mstatus_mie := mstatus_mie;
+			v_mstatus_mpie := mstatus_mpie;
 
 			v_temp := unsigned(mcycleh & mcycle) + 1;
 			v_mcycle_inc := std_logic_vector(v_temp(31 downto 0));
@@ -94,25 +102,37 @@ begin
 			v_mtimeh := v_mtimeh_inc;
 			v_mtimecmp := mtimecmp;
 			v_mtimecmph := mtimecmph;
+			v_mtval := mtval;
+			v_mtie := mtie;
+			v_mtvec_address := mtvec_address;
+			v_mtvec_mode := mtvec_mode;
+			v_mscratch := mscratch;
 
 			has_exception := false;
-			exception_cause := (others => '0');
 
 			v_temp := unsigned(minstreth & minstret);
 			if instr_retire = '1' then
 				v_temp := v_temp + 1;
 			end if;
 
-			v_minstret := std_logic_vector(v_temp(31 downto 0));
-			v_minstreth := std_logic_vector(v_temp(63 downto 32));
+			v_minstret_inc := std_logic_vector(v_temp(31 downto 0));
+			v_minstreth_inc := std_logic_vector(v_temp(63 downto 32));
+			v_minstret := v_minstret_inc;
+			v_minstreth := v_minstret_inc;
+
+			if unsigned(mtimeh & mtime) > unsigned(mtimecmph & mtimecmp) then
+				v_mtip := '1';
+			else
+				v_mtip := '0';
+			end if;
 
 			if input.is_active = '1' then
 				if input.is_invalid_address = '1' then
 					has_exception := true;
-					exception_cause := EX_CAUSE_INSTRUCTION_ACCESS_FAULT;
+					v_mcause_code := EX_CAUSE_INSTRUCTION_ACCESS_FAULT;
 				elsif input.is_invalid = '1' then
 					has_exception := true;
-					exception_cause := EX_CAUSE_ILLEGAL_INSTRUCTION;
+					v_mcause_code := EX_CAUSE_ILLEGAL_INSTRUCTION;
 				else
 					if input.operation = OP_ADD then
 						v_output.result := std_logic_vector(unsigned(input.operand1) + unsigned(input.operand2));
@@ -235,7 +255,7 @@ begin
 
 						if not (MEM_ADDRESS_MIN <= v_address and v_address <= MEM_ADDRESS_MAX) then
 							has_exception := true;
-							exception_cause := EX_CAUSE_STORE_ACCESS_FAULT;
+							v_mcause_code := EX_CAUSE_STORE_ACCESS_FAULT;
 						end if;
 					elsif input.operation = OP_SH then
 						v_address := input.operand1;
@@ -254,13 +274,13 @@ begin
 
 						if v_address(0) /= '0' then
 							has_exception := true;
-							exception_cause := EX_CAUSE_STORE_ADDRESS_MISALIGNED;
+							v_mcause_code := EX_CAUSE_STORE_ADDRESS_MISALIGNED;
 						elsif not (MEM_ADDRESS_MIN <= v_address and v_address <= MEM_ADDRESS_MAX) then
 							has_exception := true;
-							exception_cause := EX_CAUSE_STORE_ACCESS_FAULT;
+							v_mcause_code := EX_CAUSE_STORE_ACCESS_FAULT;
 						end if;
 					elsif input.operation = OP_SW then
-						v_mem_req.address := input.operand1;
+						v_address := input.operand1;
 
 						if v_address = MTIME_ADDRESS then
 							v_mtime := input.operand2;
@@ -272,15 +292,16 @@ begin
 							v_mtimecmph := input.operand2;
 						else
 							v_mem_req.active := '1';
+							v_mem_req.address := v_address;
 							v_mem_req.write_enable := "1111";
 							v_mem_req.value := input.operand2;
 
 							if v_address(1 downto 0) /= "00" then
 								has_exception := true;
-								exception_cause := EX_CAUSE_STORE_ADDRESS_MISALIGNED;
+								v_mcause_code := EX_CAUSE_STORE_ADDRESS_MISALIGNED;
 							elsif not (MEM_ADDRESS_MIN <= v_address and v_address <= MEM_ADDRESS_MAX) then
 								has_exception := true;
-								exception_cause := EX_CAUSE_STORE_ACCESS_FAULT;
+								v_mcause_code := EX_CAUSE_STORE_ACCESS_FAULT;
 							end if;
 						end if;
 					elsif input.operation = OP_LB or input.operation = OP_LH or input.operation = OP_LW or input.operation = OP_LBU or input.operation = OP_LHU then
@@ -308,25 +329,25 @@ begin
 								v_output.mem_size := SIZE_BYTE;
 								if not (MEM_ADDRESS_MIN <= v_address and v_address <= MEM_ADDRESS_MAX) then
 									has_exception := true;
-									exception_cause := EX_CAUSE_LOAD_ACCESS_FAULT;
+									v_mcause_code := EX_CAUSE_LOAD_ACCESS_FAULT;
 								end if;
 							elsif input.operation = OP_LH or input.operation = OP_LHU then
 								v_output.mem_size := SIZE_HALFWORD;
 								if v_address(0) /= '0' then
 									has_exception := true;
-									exception_cause := EX_CAUSE_LOAD_ADDRESS_MISALIGNED;
+									v_mcause_code := EX_CAUSE_LOAD_ADDRESS_MISALIGNED;
 								elsif not (MEM_ADDRESS_MIN <= v_address and v_address <= MEM_ADDRESS_MAX) then
 									has_exception := true;
-									exception_cause := EX_CAUSE_LOAD_ACCESS_FAULT;
+									v_mcause_code := EX_CAUSE_LOAD_ACCESS_FAULT;
 								end if;
 							else
 								v_output.mem_size := SIZE_WORD;
 								if v_address(1 downto 0) /= "00" then
 									has_exception := true;
-									exception_cause := EX_CAUSE_LOAD_ADDRESS_MISALIGNED;
+									v_mcause_code := EX_CAUSE_LOAD_ADDRESS_MISALIGNED;
 								elsif not (MEM_ADDRESS_MIN <= v_address and v_address <= MEM_ADDRESS_MAX) then
 									has_exception := true;
-									exception_cause := EX_CAUSE_LOAD_ACCESS_FAULT;
+									v_mcause_code := EX_CAUSE_LOAD_ACCESS_FAULT;
 								end if;
 							end if;
 						end if;
@@ -347,22 +368,22 @@ begin
 
 						if input.operand2(11 downto 0) = CSR_MSTATUS then
 							v_output.result := "000000000000000000011000" & mstatus_mpie & "000" & mstatus_mie & "000";
-							mstatus_mie <= (mstatus_mie or csr_set_bits(3)) and csr_clear_bits(3);
-							mstatus_mpie <= (mstatus_mpie or csr_set_bits(7)) and csr_clear_bits(7);
+							v_mstatus_mie := (mstatus_mie or csr_set_bits(3)) and csr_clear_bits(3);
+							v_mstatus_mpie := (mstatus_mpie or csr_set_bits(7)) and csr_clear_bits(7);
 						elsif input.operand2(11 downto 0) = CSR_MISA then
 							v_output.result := MISA_VALUE;
 						elsif input.operand2(11 downto 0) = CSR_MIE then
-							v_output.result := x"0000" & mie;
-							mie <= (mie or csr_set_bits(15 downto 0)) and csr_clear_bits(15 downto 0);
+							v_output.result := "000000000000000000000000" & mtie & "0000000";
+							v_mtie := (mtie or csr_set_bits(7)) and csr_clear_bits(7);
 						elsif input.operand2(11 downto 0) = CSR_MTVEC then
 							v_output.result := mtvec_address & "0" & mtvec_mode;
-							mtvec_address <= (mtvec_address or csr_set_bits(31 downto 2)) and csr_clear_bits(31 downto 2);
-							mtvec_mode <= (mtvec_mode or csr_set_bits(0)) and csr_clear_bits(0);
+							v_mtvec_address := (mtvec_address or csr_set_bits(31 downto 2)) and csr_clear_bits(31 downto 2);
+							v_mtvec_mode := (mtvec_mode or csr_set_bits(0)) and csr_clear_bits(0);
 						elsif input.operand2(11 downto 0) = CSR_MSTATUSH then
 							v_output.result := (others => '0');
 						elsif input.operand2(11 downto 0) = CSR_MSCRATCH then
 							v_output.result := mscratch;
-							mscratch <= (mscratch or csr_set_bits) and csr_clear_bits;
+							v_mscratch := (mscratch or csr_set_bits) and csr_clear_bits;
 						elsif input.operand2(11 downto 0) = CSR_MEPC then
 							v_output.result := mepc & "00";
 							v_mepc := (mepc or csr_set_bits(31 downto 2)) and csr_clear_bits(31 downto 2);
@@ -372,10 +393,9 @@ begin
 							mcause_code <= (mcause_code or csr_set_bits(5 downto 0)) and csr_clear_bits(5 downto 0);
 						elsif input.operand2(11 downto 0) = CSR_MTVAL then
 							v_output.result := mtval;
-							mtval <= (mtval or csr_set_bits) and csr_clear_bits;
+							v_mtval := (mtval or csr_set_bits) and csr_clear_bits;
 						elsif input.operand2(11 downto 0) = CSR_MIP then
-							v_output.result := x"0000" & mip;
-							mip <= (mip or csr_set_bits(15 downto 0)) and csr_clear_bits(15 downto 0);
+							v_output.result := "000000000000000000000000" & v_mtip & "0000000";
 						elsif input.operand2(11 downto 0) = CSR_MCYCLE then
 							v_output.result := mcycle;
 							v_mcycle := (mcycle or csr_set_bits) and csr_clear_bits;
@@ -411,25 +431,25 @@ begin
 							else
 								-- trying to read non-existent CSR
 								has_exception := true;
-								exception_cause := EX_CAUSE_ILLEGAL_INSTRUCTION;
+								v_mcause_code := EX_CAUSE_ILLEGAL_INSTRUCTION;
 							end if;
 						else
 							-- trying to write to non-existent or read-only CSR
 							has_exception := true;
-							exception_cause := EX_CAUSE_ILLEGAL_INSTRUCTION;
+							v_mcause_code := EX_CAUSE_ILLEGAL_INSTRUCTION;
 						end if;
 					elsif input.operation = OP_MRET then
-						mstatus_mie <= mstatus_mpie;
-						mstatus_mpie <= '1';
+						v_mstatus_mie := mstatus_mpie;
+						v_mstatus_mpie := '1';
 						v_jump := '1';
 						v_jump_address := mepc & "00";
 						-- TODO: reset mepc?
 					elsif input.operation = OP_ECALL then
 						has_exception := true;
-						exception_cause := EX_CAUSE_ENVIRONMENT_CALL;
+						v_mcause_code := EX_CAUSE_ENVIRONMENT_CALL;
 					elsif input.operation = OP_EBREAK then
 						has_exception := true;
-						exception_cause := EX_CAUSE_BREAKPOINT;
+						v_mcause_code := EX_CAUSE_BREAKPOINT;
 					elsif input.operation = OP_LED then
 						led <= input.operand1(7 downto 0);
 					else
@@ -439,9 +459,13 @@ begin
 					v_output.destination_reg := input.destination_reg;
 				end if;
 
-				if v_jump = '1' and v_jump_address(1) /= '0' then
+				if mstatus_mie = '1' and mtie = '1' and v_mtip = '1' then
 					has_exception := true;
-					exception_cause := EX_CAUSE_INSTRUCTION_ADDRESS_MISALIGNED;
+					v_mcause_int := '1';
+					v_mcause_code := INT_CAUSE_MACHINE_TIMER_INTERRUPT;
+				elsif v_jump = '1' and v_jump_address(1) /= '0' then
+					has_exception := true;
+					v_mcause_code := EX_CAUSE_INSTRUCTION_ADDRESS_MISALIGNED;
 				end if;
 
 				if has_exception then
@@ -459,8 +483,15 @@ begin
 					v_minstret := v_minstret_inc;
 					v_minstreth := v_minstreth_inc;
 					v_mepc := input.pc(31 downto 2);
-					v_mcause_int := '0';
-					v_mcause_code := exception_cause;
+					v_mtval := (others => '0');
+					v_mstatus_mie := '0';
+					v_mstatus_mpie := mstatus_mie;
+					v_mtie := mtie;
+					v_mtvec_address := mtvec_address;
+					v_mtvec_mode := mtvec_mode;
+					v_mscratch := mscratch;
+					v_mcause_int := mcause_int;
+					v_mcause_code := mcause_code;
 				end if;
 			end if;
 
@@ -477,6 +508,15 @@ begin
 			minstret <= v_minstret;
 			minstreth <= v_minstreth;
 			mepc <= v_mepc;
+			mcause_int <= v_mcause_int;
+			mcause_code <= v_mcause_code;
+			mtval <= v_mtval;
+			mstatus_mie <= v_mstatus_mie;
+			mstatus_mpie <= v_mstatus_mpie;
+			mtie <= v_mtie;
+			mtvec_address <= v_mtvec_address;
+			mtvec_mode <= v_mtvec_mode;
+			mscratch <= v_mscratch;
 			mcause_int <= v_mcause_int;
 			mcause_code <= v_mcause_code;
 		end if;

@@ -94,4 +94,6 @@ package core_constants is
 	constant EX_CAUSE_STORE_ADDRESS_MISALIGNED: std_logic_vector(3 downto 0) := "0110";
 	constant EX_CAUSE_STORE_ACCESS_FAULT: std_logic_vector(3 downto 0) := "0111";
 	constant EX_CAUSE_ENVIRONMENT_CALL: std_logic_vector(3 downto 0) := "1011";
+
+	constant INT_CAUSE_MACHINE_TIMER_INTERRUPT: std_logic_vector(3 downto 0) := "0111";
 end package core_constants;
