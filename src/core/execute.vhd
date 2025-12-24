@@ -41,7 +41,10 @@ architecture rtl of execute is
 	signal mtimeh: std_logic_vector(31 downto 0) := (others => '0');
 	signal mtimecmp: std_logic_vector(31 downto 0) := (others => '0');
 	signal mtimecmph: std_logic_vector(31 downto 0) := (others => '0');
+	signal s_led: std_logic_vector(7 downto 0) := (others => '0');
 begin
+
+	led <= s_led;
 
 	process (clk)
 		variable v_output: execute_output_t;
@@ -66,6 +69,7 @@ begin
 		variable v_mtvec_address: std_logic_vector(29 downto 0);
 		variable v_mtvec_mode: std_logic;
 		variable v_mscratch: std_logic_vector(31 downto 0);
+		variable v_led: std_logic_vector(7 downto 0);
 
 		variable v_address, v_value: std_logic_vector(31 downto 0);
 		
@@ -389,8 +393,8 @@ begin
 							v_mepc := (mepc or csr_set_bits(31 downto 2)) and csr_clear_bits(31 downto 2);
 						elsif input.operand2(11 downto 0) = CSR_MCAUSE then
 							v_output.result := mcause_int & "000000000000000000000000000" & mcause_code;
-							mcause_int <= (mcause_int or csr_set_bits(31)) and csr_clear_bits(31);
-							mcause_code <= (mcause_code or csr_set_bits(5 downto 0)) and csr_clear_bits(5 downto 0);
+							v_mcause_int := (mcause_int or csr_set_bits(31)) and csr_clear_bits(31);
+							v_mcause_code := (mcause_code or csr_set_bits(5 downto 0)) and csr_clear_bits(5 downto 0);
 						elsif input.operand2(11 downto 0) = CSR_MTVAL then
 							v_output.result := mtval;
 							v_mtval := (mtval or csr_set_bits) and csr_clear_bits;
@@ -451,7 +455,7 @@ begin
 						has_exception := true;
 						v_mcause_code := EX_CAUSE_BREAKPOINT;
 					elsif input.operation = OP_LED then
-						led <= input.operand1(7 downto 0);
+						v_led := input.operand1(7 downto 0);
 					else
 						assert false report "Unhandled operation value in execute stage" severity failure;
 					end if;
@@ -492,6 +496,7 @@ begin
 					v_mscratch := mscratch;
 					v_mcause_int := mcause_int;
 					v_mcause_code := mcause_code;
+					v_led := s_led;
 				end if;
 			end if;
 
@@ -519,6 +524,7 @@ begin
 			mscratch <= v_mscratch;
 			mcause_int <= v_mcause_int;
 			mcause_code <= v_mcause_code;
+			s_led <= v_led;
 		end if;
 	end process;
 
