@@ -394,7 +394,7 @@ begin
 						elsif input.operand2(11 downto 0) = CSR_MCAUSE then
 							v_output.result := mcause_int & "000000000000000000000000000" & mcause_code;
 							v_mcause_int := (mcause_int or csr_set_bits(31)) and csr_clear_bits(31);
-							v_mcause_code := (mcause_code or csr_set_bits(5 downto 0)) and csr_clear_bits(5 downto 0);
+							v_mcause_code := (mcause_code or csr_set_bits(3 downto 0)) and csr_clear_bits(3 downto 0);
 						elsif input.operand2(11 downto 0) = CSR_MTVAL then
 							v_output.result := mtval;
 							v_mtval := (mtval or csr_set_bits) and csr_clear_bits;
@@ -522,8 +522,6 @@ begin
 			mtvec_address <= v_mtvec_address;
 			mtvec_mode <= v_mtvec_mode;
 			mscratch <= v_mscratch;
-			mcause_int <= v_mcause_int;
-			mcause_code <= v_mcause_code;
 			s_led <= v_led;
 		end if;
 	end process;
